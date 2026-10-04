@@ -12,6 +12,7 @@ let playbackToken = 0;
 
 const PLAYBACK_DELAY = 1000;
 
+
 /* =========================
    Simulation Modes
    ========================= */
@@ -70,6 +71,7 @@ function wait(milliseconds) {
     return new Promise(resolve => window.setTimeout(resolve, milliseconds));
 }
 
+
 /* =========================
    Circuit Configuration
    ========================= */
@@ -102,6 +104,7 @@ const circuitNetworks = {
         }
     }
 };
+
 
 /* =========================
    Event Configuration
@@ -202,6 +205,7 @@ const parentCallPatterns = {
     }
 };
 
+
 /* =========================
    Inheritance Calls
    ========================= */
@@ -226,6 +230,7 @@ const inheritanceCalls = {
         oopConcepts: "Inheritance · Code Reuse · super()"
     }
 };
+
 
 /* =========================
    Terminal Explanations

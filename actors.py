@@ -1,3 +1,7 @@
+# =========================
+# Attacker Class
+# =========================
+
 class Attacker:
     def __init__(self, name, attacks):
         self.__name = name
@@ -59,6 +63,10 @@ class Attacker:
     def __str__(self):
         return f"Attacker: {self.__name}"
 
+
+# =========================
+# Defender Class
+# =========================
 
 class Defender:
     def __init__(self, name):

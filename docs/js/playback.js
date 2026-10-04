@@ -16,6 +16,7 @@ async function getSimulationState() {
     }
 }
 
+
 /* =========================
    Playback State
    ========================= */
@@ -112,6 +113,7 @@ function resetPlaybackVisuals() {
     clearStateChanges();
     currentRootButton?.classList.add("active-source");
 }
+
 
 /* =========================
    Guided Mode
@@ -270,6 +272,7 @@ async function setSimulationMode(mode) {
     await resetSimulation();
 }
 
+
 /* =========================
    Playback Helpers
    ========================= */
@@ -312,6 +315,24 @@ function getParentCallPattern(parentSourceId, childSourceId) {
     return patterns[Math.min(count, patterns.length - 1)];
 }
 
+function activateCircuitForMethodStart(rootSourceId, eventSourceId, circuitType) {
+    if (!circuitType) return;
+
+    const targets = circuitNetworks[circuitType]?.actions[rootSourceId] || [];
+    let targetId = null;
+
+    if (targets.includes(eventSourceId)) {
+        targetId = eventSourceId;
+    }
+    else if (eventSourceId === rootSourceId) {
+        targetId = targets[0] || null;
+    }
+
+    if (targetId) {
+        activateTarget(circuitType, rootSourceId, targetId);
+    }
+}
+
 async function markSourcePatternExecuted(sourceId, pattern) {
     if (!sourceId || !pattern || !currentRootButton) return null;
 
@@ -336,6 +357,7 @@ function removeMethodFromStack(sourceId) {
         }
     }
 }
+
 
 /* =========================
    Inheritance Visualization
@@ -720,17 +742,14 @@ async function playExecutionEvent(event, token) {
         const parentSourceId = playbackMethodStack[playbackMethodStack.length - 1];
         const callPattern = getParentCallPattern(parentSourceId, event.source_id);
 
+        // Start or update the circuit glow immediately when the method begins.
+        // This keeps the visual interaction in sync instead of waiting for
+        // source-line highlighting to finish first.
+        activateCircuitForMethodStart(rootSourceId, event.source_id, circuitType);
+
         if (callPattern) {
             await highlightSourcePattern(parentSourceId, callPattern, currentRootButton, token);
             if (token !== playbackToken) return false;
-        }
-
-        if (circuitType && event.source_id) {
-            activateTarget(circuitType, rootSourceId, event.source_id);
-        }
-
-        if (rootSourceId === "defender-inspect" && event.source_id === "defender-inspect") {
-            activateTarget("defender", rootSourceId, "network-device");
         }
 
         playbackMethodStack.push(event.source_id);
@@ -768,17 +787,11 @@ async function rebuildPlaybackTo(targetIndex) {
             const parentSourceId = playbackMethodStack[playbackMethodStack.length - 1];
             const callPattern = getParentCallPattern(parentSourceId, event.source_id);
 
+            activateCircuitForMethodStart(rootSourceId, event.source_id, circuitType);
+
             if (callPattern) {
                 const line = await markSourcePatternExecuted(parentSourceId, callPattern);
                 if (line) lastExecutedLine = line;
-            }
-
-            if (circuitType && event.source_id) {
-                activateTarget(circuitType, rootSourceId, event.source_id);
-            }
-
-            if (rootSourceId === "defender-inspect" && event.source_id === "defender-inspect") {
-                activateTarget("defender", rootSourceId, "network-device");
             }
 
             playbackMethodStack.push(event.source_id);

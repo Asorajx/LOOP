@@ -1,4 +1,6 @@
-/* ========================= Circuit Helpers ========================= */
+/* =========================
+   Circuit Helpers
+   ========================= */
 
 function createCircuitPath(svg, pathData, className) {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -45,7 +47,10 @@ function getBusX(network, spaceRect) {
     return sourceEdge + (targetEdge - sourceEdge) / 2;
 }
 
-/* ========================= Static Circuit Network ========================= */
+
+/* =========================
+   Static Circuit Network
+   ========================= */
 
 function drawCircuitLines() {
     const space = document.getElementById("cyber-space");
@@ -104,6 +109,7 @@ function drawBranch(id, type, isSource, network, busX, spaceRect, svg) {
     createCircuitPath(svg, `M ${x} ${y} H ${busX}`, `circuit-line ${type}-line`);
     addCircuitNode(svg, busX, y, type);
 }
+
 
 /* =========================
    Active Circuit Interaction

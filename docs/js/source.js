@@ -86,18 +86,48 @@ async function loadMethodSource(button, drawer) {
         code.textContent = "Unable to load source code.";
         console.error("Unable to load method source:", error);
     }
+}
 
-    window.requestAnimationFrame(redrawCircuitNetwork);
+function waitForDrawerTransition(drawer) {
+    return new Promise(function(resolve) {
+        let finished = false;
+
+        function finish() {
+            if (finished) return;
+            finished = true;
+            drawer.removeEventListener("transitionend", handleTransitionEnd);
+            window.clearTimeout(fallbackTimer);
+            resolve();
+        }
+
+        function handleTransitionEnd(event) {
+            if (event.target === drawer && event.propertyName === "grid-template-rows") {
+                finish();
+            }
+        }
+
+        drawer.addEventListener("transitionend", handleTransitionEnd);
+        const fallbackTimer = window.setTimeout(finish, 280);
+    });
+}
+
+function pauseActiveCircuitGlow() {
+    document.querySelectorAll(".circuit-active").forEach(path => path.remove());
 }
 
 function closeCodeDrawer(button) {
     const drawer = document.getElementById(button.getAttribute("aria-controls"));
-    if (!drawer) return;
+    if (!drawer) return Promise.resolve();
 
     clearLineHighlights(drawer);
+    pauseActiveCircuitGlow();
+
+    const transition = waitForDrawerTransition(drawer);
     button.setAttribute("aria-expanded", "false");
     drawer.setAttribute("aria-hidden", "true");
     drawer.classList.remove("open");
+
+    return transition;
 }
 
 async function openCodeDrawer(button) {
@@ -105,19 +135,31 @@ async function openCodeDrawer(button) {
     const drawer = document.getElementById(button.getAttribute("aria-controls"));
     if (!panel || !drawer) return null;
 
+    const closingTransitions = [];
+
     panel.querySelectorAll('.method[aria-expanded="true"]').forEach(function(openButton) {
-        if (openButton !== button) closeCodeDrawer(openButton);
+        if (openButton !== button) {
+            closingTransitions.push(closeCodeDrawer(openButton));
+        }
     });
 
+    pauseActiveCircuitGlow();
+
+    const openingTransition = waitForDrawerTransition(drawer);
     button.setAttribute("aria-expanded", "true");
     drawer.setAttribute("aria-hidden", "false");
     drawer.classList.add("open");
-    await loadMethodSource(button, drawer);
+
+    await Promise.all([
+        loadMethodSource(button, drawer),
+        openingTransition,
+        ...closingTransitions
+    ]);
 
     const codeBlock = drawer.querySelector(".source-code");
     if (codeBlock) codeBlock.scrollTop = 0;
 
-    window.setTimeout(redrawCircuitNetwork, 240);
+    redrawCircuitNetwork();
     return drawer;
 }
 
@@ -128,8 +170,8 @@ async function toggleCodeDrawer(button) {
     const wasOpen = button.getAttribute("aria-expanded") === "true";
 
     if (wasOpen) {
-        closeCodeDrawer(button);
-        window.setTimeout(redrawCircuitNetwork, 240);
+        await closeCodeDrawer(button);
+        redrawCircuitNetwork();
         return false;
     }
 

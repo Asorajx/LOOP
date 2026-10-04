@@ -22,6 +22,7 @@ function setupMethodInteractions() {
     });
 }
 
+
 /* =========================
    Playback Controls
    ========================= */
@@ -35,6 +36,7 @@ function setupPlaybackControls() {
     document.getElementById("playback-reset")?.addEventListener("click", resetSimulation);
     updatePlaybackControls();
 }
+
 
 /* =========================
    Mode Controls
@@ -52,6 +54,7 @@ function setupModeControls() {
     updateModeControls();
     updateGuidedSceneDisplay();
 }
+
 
 /* =========================
    Initialisation
