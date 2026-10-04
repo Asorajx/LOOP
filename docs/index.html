@@ -13,9 +13,12 @@
 </head>
 <body>
 <div class="page">
+
+
     <!-- =========================
          Header
          ========================= -->
+
     <header>
         <div class="brand">
             <h1>CO-OP</h1>
@@ -38,17 +41,33 @@
         <div class="scenario">Cyber Space</div>
     </header>
 
+
     <!-- =========================
          Main Interface
          ========================= -->
+
     <main>
+
+
         <!-- =========================
              Terminal
              ========================= -->
+
         <section class="terminal" id="terminal" aria-label="Execution terminal">
             <div class="terminal-header">
                 <span class="terminal-title">Terminal</span>
+                <div class="terminal-mode" aria-label="Simulation mode">
+                    <span class="terminal-mode-label">Mode</span>
+                    <button class="terminal-mode-button active" id="mode-manual" type="button" aria-pressed="true">Manual</button>
+                    <button class="terminal-mode-button" id="mode-guided" type="button" aria-pressed="false">Guided</button>
+                </div>
                 <span class="terminal-event-count" id="terminal-event-count">Event 0 / 0</span>
+            </div>
+            <div class="guided-scene-bar" id="guided-scene-bar" hidden>
+                <span class="guided-scene-number" id="guided-scene-number">Scene 1 / 6</span>
+                <strong class="guided-scene-title" id="guided-scene-title">Credential Attack</strong>
+                <span class="guided-scene-focus" id="guided-scene-focus"></span>
+                <span class="guided-scene-status" id="guided-scene-status">Press Play to begin.</span>
             </div>
             <div class="terminal-log" id="terminal-log" role="log" aria-live="polite" aria-relevant="additions text">
                 <div class="terminal-empty">
@@ -187,6 +206,7 @@
     <!-- =========================
          Footer
          ========================= -->
+
     <footer>
         <span>Scenario / Cybersecurity</span>
         <span id="system-status">System Ready</span>
@@ -196,6 +216,7 @@
 <!-- =========================
      Scripts
      ========================= -->
+
 <script src="js/config.js"></script>
 <script src="js/source.js"></script>
 <script src="js/circuits.js"></script>

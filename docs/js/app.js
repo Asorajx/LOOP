@@ -7,6 +7,14 @@ function setupMethodInteractions() {
         createCodeDrawer(button);
 
         button.addEventListener("click", async function() {
+            if (currentMode === simulationModes.GUIDED) {
+                if (isPlaying || isProcessingEvent || isResetting) return;
+
+                await toggleCodeDrawer(button);
+                setSystemStatus("Guided Mode");
+                return;
+            }
+
             stopEventPlayback();
             await toggleCodeDrawer(button);
             await executeMethod(button);
@@ -29,12 +37,30 @@ function setupPlaybackControls() {
 }
 
 /* =========================
+   Mode Controls
+   ========================= */
+
+function setupModeControls() {
+    document.getElementById("mode-manual")?.addEventListener("click", function() {
+        setSimulationMode(simulationModes.MANUAL);
+    });
+
+    document.getElementById("mode-guided")?.addEventListener("click", function() {
+        setSimulationMode(simulationModes.GUIDED);
+    });
+
+    updateModeControls();
+    updateGuidedSceneDisplay();
+}
+
+/* =========================
    Initialisation
    ========================= */
 
 getSimulationState();
 setupMethodInteractions();
 setupPlaybackControls();
+setupModeControls();
 clearStateChanges();
 window.addEventListener("load", redrawCircuitNetwork);
 window.addEventListener("resize", redrawCircuitNetwork);

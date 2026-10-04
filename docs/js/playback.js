@@ -29,6 +29,9 @@ let playbackCallCounts = {};
 let isPlaying = false;
 let isProcessingEvent = false;
 let isResetting = false;
+let isGuidedPreparing = false;
+let currentMode = simulationModes.MANUAL;
+let guidedSceneIndex = 0;
 
 function hasPlaybackEvents() {
     return executionEvents.length > 0;
@@ -46,8 +49,9 @@ function updatePlaybackControls() {
     const replayButton = document.getElementById("playback-replay");
     const resetButton = document.getElementById("playback-reset");
     const progress = document.getElementById("playback-progress");
-    const busy = isProcessingEvent || isResetting;
+    const busy = isProcessingEvent || isResetting || isGuidedPreparing;
     const complete = playbackComplete();
+    const guidedComplete = isGuidedSequenceComplete();
 
     if (previousButton) {
         previousButton.disabled = !hasPlaybackEvents() || currentEventIndex <= 0 || isPlaying || busy;
@@ -56,7 +60,12 @@ function updatePlaybackControls() {
         nextButton.disabled = !hasPlaybackEvents() || complete || isPlaying || busy;
     }
     if (playButton) {
-        playButton.disabled = !hasPlaybackEvents() || complete || isPlaying || busy;
+        if (currentMode === simulationModes.GUIDED) {
+            playButton.disabled = guidedComplete || isPlaying || busy;
+        }
+        else {
+            playButton.disabled = !hasPlaybackEvents() || complete || isPlaying || busy;
+        }
     }
     if (pauseButton) {
         pauseButton.disabled = !isPlaying;
@@ -75,6 +84,8 @@ function updatePlaybackControls() {
 
         progress.textContent = `${Math.min(displayedIndex, executionEvents.length)} / ${executionEvents.length}`;
     }
+
+    updateModeControls();
 }
 
 function resetPlaybackPosition() {
@@ -98,6 +109,163 @@ function resetPlaybackVisuals() {
     clearActiveVisuals();
     clearStateChanges();
     currentRootButton?.classList.add("active-source");
+}
+
+/* =========================
+   Guided Mode
+   ========================= */
+
+function getCurrentGuidedScene() {
+    return guidedScenes[guidedSceneIndex] || null;
+}
+
+function isGuidedSequenceComplete() {
+    return (
+        currentMode === simulationModes.GUIDED
+        && guidedSceneIndex === guidedScenes.length - 1
+        && hasPlaybackEvents()
+        && playbackComplete()
+    );
+}
+
+function updateModeControls() {
+    const manualButton = document.getElementById("mode-manual");
+    const guidedButton = document.getElementById("mode-guided");
+    const busy = isPlaying || isProcessingEvent || isResetting || isGuidedPreparing;
+
+    if (manualButton) {
+        const active = currentMode === simulationModes.MANUAL;
+        manualButton.classList.toggle("active", active);
+        manualButton.setAttribute("aria-pressed", String(active));
+        manualButton.disabled = busy;
+    }
+
+    if (guidedButton) {
+        const active = currentMode === simulationModes.GUIDED;
+        guidedButton.classList.toggle("active", active);
+        guidedButton.setAttribute("aria-pressed", String(active));
+        guidedButton.disabled = busy;
+    }
+}
+
+function updateGuidedSceneDisplay(message = null) {
+    const bar = document.getElementById("guided-scene-bar");
+    const number = document.getElementById("guided-scene-number");
+    const title = document.getElementById("guided-scene-title");
+    const focus = document.getElementById("guided-scene-focus");
+    const status = document.getElementById("guided-scene-status");
+
+    if (!bar) return;
+
+    if (currentMode !== simulationModes.GUIDED) {
+        bar.hidden = true;
+        return;
+    }
+
+    const scene = getCurrentGuidedScene();
+    bar.hidden = false;
+
+    if (number) number.textContent = `Scene ${guidedSceneIndex + 1} / ${guidedScenes.length}`;
+    if (title) title.textContent = scene?.title || "Guided Mode";
+    if (focus) focus.textContent = scene ? `Focus: ${scene.focus}` : "";
+    if (status && message !== null) status.textContent = message;
+}
+
+function showGuidedReady(totalEvents = 0) {
+    const scene = getCurrentGuidedScene();
+    const count = document.getElementById("terminal-event-count");
+    const log = document.getElementById("terminal-log");
+
+    updateGuidedSceneDisplay("Press Play to begin.");
+    if (count) count.textContent = `Event 0 / ${totalEvents}`;
+    if (!log || !scene) return;
+
+    log.innerHTML = "";
+    const empty = document.createElement("div");
+    empty.className = "terminal-empty";
+    empty.appendChild(createTerminalText("terminal-empty-title", `${scene.title} · Ready`));
+    empty.appendChild(createTerminalText("terminal-empty-copy", scene.intro));
+    empty.appendChild(createTerminalText("terminal-empty-copy", "Press Play to run the real Python scene, then use Previous or Next to review its events."));
+    log.appendChild(empty);
+    log.scrollTop = 0;
+}
+
+async function resetBackendState() {
+    const response = await fetch("/api/reset", {
+        method: "POST"
+    });
+    const data = await response.json();
+
+    if (!data.success) {
+        throw new Error(data.message || "Unable to reset simulation.");
+    }
+
+    simulationState = {
+        devices: data.devices || [],
+        connections: data.connections || []
+    };
+}
+
+function closeAllCodeDrawers() {
+    document
+        .querySelectorAll('.method[aria-expanded="true"]')
+        .forEach(function(button) {
+            closeCodeDrawer(button);
+        });
+}
+
+async function startGuidedScene() {
+    const scene = getCurrentGuidedScene();
+    if (!scene || isResetting || isGuidedPreparing) return;
+
+    const button = document.getElementById(scene.action);
+    if (!button) {
+        setSystemStatus("Guided Error");
+        console.error(`Guided source not found: ${scene.action}`);
+        return;
+    }
+
+    isGuidedPreparing = true;
+    updatePlaybackControls();
+
+    try {
+        setSystemStatus(`Scene ${guidedSceneIndex + 1}`);
+        updateGuidedSceneDisplay("Preparing scene...");
+        await resetBackendState();
+
+        stopEventPlayback();
+        closeAllCodeDrawers();
+        clearPlaybackSession();
+        clearAllLineHighlights();
+        clearActiveVisuals();
+        clearStateChanges();
+        await openCodeDrawer(button);
+
+        updateGuidedSceneDisplay("Running scene...");
+        isGuidedPreparing = false;
+        updatePlaybackControls();
+        await executeMethod(button, scene.request || {}, true);
+    }
+    catch (error) {
+        setSystemStatus("Guided Error");
+        updateGuidedSceneDisplay("Unable to start this scene.");
+        console.error("Unable to start guided scene:", error);
+    }
+    finally {
+        isGuidedPreparing = false;
+        updatePlaybackControls();
+    }
+}
+
+async function setSimulationMode(mode) {
+    if (!Object.values(simulationModes).includes(mode)) return;
+    if (mode === currentMode || isPlaying || isProcessingEvent || isResetting) return;
+
+    currentMode = mode;
+    guidedSceneIndex = 0;
+    updateModeControls();
+    updateGuidedSceneDisplay();
+    await resetSimulation();
 }
 
 /* =========================
@@ -391,8 +559,13 @@ function renderTerminalAtPosition(position, forceScroll = false) {
     if (count) count.textContent = `Event ${safePosition} / ${executionEvents.length}`;
 
     if (safePosition === 0) {
-        resetTerminal();
-        if (count) count.textContent = `Event 0 / ${executionEvents.length}`;
+        if (currentMode === simulationModes.GUIDED) {
+            showGuidedReady(executionEvents.length);
+        }
+        else {
+            resetTerminal();
+            if (count) count.textContent = `Event 0 / ${executionEvents.length}`;
+        }
         return;
     }
 
@@ -538,7 +711,21 @@ function finishPlayback() {
     }
 
     const result = currentExecutionData?.result;
-    setSystemStatus(result === false ? "Attack Blocked" : "System Ready");
+
+    if (currentMode === simulationModes.GUIDED) {
+        if (isGuidedSequenceComplete()) {
+            setSystemStatus("Guided Complete");
+            updateGuidedSceneDisplay("Guided sequence complete.");
+        }
+        else {
+            setSystemStatus("Scene Complete");
+            updateGuidedSceneDisplay("Scene complete · Press Play for the next scene.");
+        }
+    }
+    else {
+        setSystemStatus(result === false ? "Attack Blocked" : "System Ready");
+    }
+
     updatePlaybackControls();
 }
 
@@ -598,7 +785,25 @@ async function nextPlayback() {
 }
 
 async function playPlayback() {
-    if (!hasPlaybackEvents() || playbackComplete() || isPlaying || isProcessingEvent) return;
+    if (isPlaying || isProcessingEvent || isResetting) return;
+
+    if (currentMode === simulationModes.GUIDED) {
+        if (isGuidedSequenceComplete()) return;
+
+        if (!hasPlaybackEvents()) {
+            await startGuidedScene();
+            return;
+        }
+
+        if (playbackComplete()) {
+            guidedSceneIndex += 1;
+            updateGuidedSceneDisplay("Press Play to begin.");
+            await startGuidedScene();
+            return;
+        }
+    }
+
+    if (!hasPlaybackEvents() || playbackComplete()) return;
 
     terminalFollowLatest = true;
     isPlaying = true;
@@ -670,34 +875,24 @@ async function resetSimulation() {
     updatePlaybackControls();
 
     try {
-        const response = await fetch("/api/reset", {
-            method: "POST"
-        });
-        const data = await response.json();
+        await resetBackendState();
 
-        if (!data.success) {
-            setSystemStatus("Reset Error");
-            console.error(data.message || "Unable to reset simulation.");
-            return;
-        }
-
-        simulationState = {
-            devices: data.devices || [],
-            connections: data.connections || []
-        };
-
-        document
-            .querySelectorAll('.method[aria-expanded="true"]')
-            .forEach(function(button) {
-                closeCodeDrawer(button);
-            });
-
+        closeAllCodeDrawers();
         clearAllLineHighlights();
         clearActiveVisuals();
         clearStateChanges();
         clearPlaybackSession();
         window.setTimeout(redrawCircuitNetwork, 240);
-        setSystemStatus("System Ready");
+
+        if (currentMode === simulationModes.GUIDED) {
+            guidedSceneIndex = 0;
+            showGuidedReady();
+            setSystemStatus("Guided Ready");
+        }
+        else {
+            updateGuidedSceneDisplay();
+            setSystemStatus("System Ready");
+        }
     }
     catch (error) {
         setSystemStatus("Connection Error");
@@ -706,6 +901,7 @@ async function resetSimulation() {
     finally {
         isResetting = false;
         updatePlaybackControls();
+        updateGuidedSceneDisplay();
     }
 }
 
@@ -713,7 +909,9 @@ async function resetSimulation() {
    Python Execution
    ========================= */
 
-async function executeMethod(button) {
+async function executeMethod(button, requestData = {}, fromGuided = false) {
+    if (currentMode === simulationModes.GUIDED && !fromGuided) return;
+
     stopEventPlayback();
     clearPlaybackSession();
     clearAllLineHighlights();
@@ -729,7 +927,7 @@ async function executeMethod(button) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({})
+            body: JSON.stringify(requestData)
         });
         const data = await response.json();
 
@@ -753,3 +951,4 @@ async function executeMethod(button) {
         console.error("Unable to execute Python method:", error);
     }
 }
+

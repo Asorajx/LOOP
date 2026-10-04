@@ -12,6 +12,60 @@ let playbackToken = 0;
 
 const PLAYBACK_DELAY = 1000;
 
+/* =========================
+   Simulation Modes
+   ========================= */
+
+const simulationModes = {
+    MANUAL: "manual",
+    GUIDED: "guided"
+};
+
+const guidedScenes = [
+    {
+        title: "Credential Attack",
+        action: "credential-execute",
+        request: { target: "DEV001" },
+        focus: "Object Interaction · Encapsulation",
+        intro: "Watch CredentialAttack call a NetworkDevice method instead of changing the device's private state directly."
+    },
+    {
+        title: "MITM Attack",
+        action: "mitm-execute",
+        request: { target: "CON001" },
+        focus: "Composition · Object Interaction",
+        intro: "Watch the Connection object update itself and interact with both devices that it contains."
+    },
+    {
+        title: "DoS Attack",
+        action: "dos-execute",
+        request: { target: "DEV001" },
+        focus: "Polymorphism · Multiple State Changes",
+        intro: "Watch one execute() method change both the device risk level and traffic level."
+    },
+    {
+        title: "DDoS Attack",
+        action: "ddos-execute",
+        request: { target: "DEV001" },
+        focus: "Inheritance · Method Overriding · super()",
+        intro: "Watch DDoSAttack reuse DoSAttack through super(), then add stronger behaviour of its own."
+    },
+    {
+        title: "Malware Attack",
+        action: "malware-execute",
+        request: { target: "DEV001" },
+        focus: "Polymorphism · Encapsulation",
+        intro: "Watch MalwareAttack use the same execute() interface while changing the device through its public method."
+    },
+    {
+        title: "Ransomware Attack",
+        action: "ransomware-execute",
+        request: { target: "DEV001" },
+        focus: "Inheritance · Method Extension · super()",
+        intro: "Watch RansomwareAttack reuse MalwareAttack, then extend it by increasing risk again and locking files."
+    }
+];
+
 function wait(milliseconds) {
     return new Promise(resolve => window.setTimeout(resolve, milliseconds));
 }

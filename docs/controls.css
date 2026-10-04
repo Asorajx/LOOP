@@ -106,10 +106,10 @@
 }
 
 .terminal-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    height: 36px;
+    min-height: 36px;
     padding: 0 14px;
     border-bottom: 1px solid rgba(127, 111, 168, 0.24);
 }
@@ -122,15 +122,110 @@
     text-transform: uppercase;
 }
 
+.terminal-mode {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.terminal-mode-label {
+    margin-right: 2px;
+    color: rgba(166, 147, 209, 0.62);
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+}
+
+.terminal-mode-button {
+    height: 24px;
+    padding: 0 9px;
+    color: #837795;
+    background: rgba(127, 111, 168, 0.025);
+    border: 1px solid rgba(127, 111, 168, 0.30);
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition:
+        color 0.16s ease,
+        background-color 0.16s ease,
+        border-color 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
+.terminal-mode-button:hover:not(:disabled) {
+    color: #efeaf7;
+    background: rgba(127, 111, 168, 0.08);
+    border-color: rgba(166, 147, 209, 0.58);
+}
+
+.terminal-mode-button.active {
+    color: #f3eefb;
+    background: rgba(127, 111, 168, 0.12);
+    border-color: rgba(166, 147, 209, 0.78);
+    box-shadow:
+        0 0 6px rgba(127, 111, 168, 0.30),
+        0 0 14px rgba(127, 111, 168, 0.10);
+}
+
+.terminal-mode-button:disabled {
+    opacity: 0.42;
+    cursor: default;
+}
+
+.terminal-mode-button:focus-visible {
+    outline: 1px solid var(--terminal-bright);
+    outline-offset: 2px;
+}
+
 .terminal-event-count {
+    justify-self: end;
     color: rgba(166, 147, 209, 0.68);
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
+.guided-scene-bar {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 7px 12px;
+    min-height: 34px;
+    padding: 8px 14px;
+    background: rgba(127, 111, 168, 0.045);
+    border-bottom: 1px solid rgba(127, 111, 168, 0.18);
+}
+
+.guided-scene-bar[hidden] {
+    display: none;
+}
+
+.guided-scene-number {
+    color: rgba(166, 147, 209, 0.72);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.guided-scene-title {
+    color: #ebe6f3;
+    font-size: 12px;
+}
+
+.guided-scene-focus {
+    color: #8f99a2;
+    font-size: 11px;
+}
+
+.guided-scene-status {
+    margin-left: auto;
+    color: #b9adc9;
+    font-size: 11px;
+}
+
 .terminal-log {
-    height: 260px;
+    height: 220px;
     padding: 10px 14px 14px;
     overflow-y: auto;
     scroll-behavior: smooth;
@@ -288,10 +383,6 @@
     min-height: calc(100vh - 430px);
 }
 
-.terminal + .cyber-space .space {
-    min-height: calc(100vh - 430px);
-}
-
 /* =========================
    Victim Active Method
    ========================= */
@@ -325,6 +416,23 @@ footer {
    ========================= */
 
 @media (max-width: 900px) {
+    .terminal-header {
+        grid-template-columns: minmax(0, 1fr) auto;
+        row-gap: 7px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+
+    .terminal-mode {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .guided-scene-status {
+        width: 100%;
+        margin-left: 0;
+    }
+
     .terminal-log {
         height: 200px;
     }
