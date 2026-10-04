@@ -1,0 +1,171 @@
+/* =========================
+   Source Code Drawers
+   ========================= */
+
+/* Drawers are inserted by JavaScript so every method uses the same structure. */
+.code-drawer {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-rows: 0fr;
+    background: rgba(5, 9, 13, 0.72);
+    border-bottom: 0 solid #202b34;
+    transition: grid-template-rows 0.22s ease, border-bottom-width 0.22s ease;
+}
+
+.code-drawer.open {
+    grid-template-rows: 1fr;
+    border-bottom-width: 1px;
+}
+
+.code-drawer-inner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.source-code {
+    max-height: 260px;
+    margin: 0;
+    padding: 14px 18px 16px;
+    overflow: auto;
+    color: #9aaab6;
+    background: rgba(3, 7, 11, 0.52);
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    white-space: pre;
+    tab-size: 4;
+    scrollbar-width: thin;
+    scrollbar-color: #46545f rgba(255, 255, 255, 0.025);
+}
+
+/* Keeps the code scrollbar consistent with the dark interface. */
+.source-code::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+.source-code::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.source-code::-webkit-scrollbar-thumb {
+    background: #46545f;
+    border: 2px solid #080d12;
+    border-radius: 4px;
+}
+
+.source-code::-webkit-scrollbar-thumb:hover {
+    background: #60717d;
+}
+
+.source-code::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Each source line is separate so execution can be shown visually. */
+.source-line {
+    display: block;
+    min-height: 1.55em;
+    margin: 0 -18px;
+    padding: 0 18px;
+    border-left: 2px solid transparent;
+    transition:
+        color 0.16s ease,
+        background-color 0.16s ease,
+        border-color 0.16s ease,
+        text-shadow 0.16s ease;
+}
+
+/* Executed lines stay clearly visible after the animation has passed them. */
+.source-line.executed {
+    color: #e1e9ee;
+    background: rgba(108, 167, 186, 0.10);
+    border-left-color: rgba(108, 167, 186, 0.7);
+}
+
+.attacker .source-line.executed {
+    color: #e7d9da;
+    background: rgba(132, 98, 99, 0.13);
+    border-left-color: rgba(211, 155, 157, 0.7);
+}
+
+.defender .source-line.executed {
+    color: #dce8e2;
+    background: rgba(97, 120, 110, 0.14);
+    border-left-color: rgba(155, 199, 179, 0.7);
+}
+
+/* The line currently being executed receives the stronger glow. */
+.source-line.executing {
+    color: #ffffff;
+    background: rgba(108, 167, 186, 0.12);
+    border-left-color: var(--accent);
+    text-shadow: 0 0 8px rgba(108, 167, 186, 0.25);
+}
+
+.attacker .source-line.executing {
+    background: rgba(132, 98, 99, 0.14);
+    border-left-color: var(--attacker);
+    text-shadow: 0 0 8px rgba(211, 155, 157, 0.22);
+}
+
+.defender .source-line.executing {
+    background: rgba(97, 120, 110, 0.15);
+    border-left-color: var(--defender);
+    text-shadow: 0 0 8px rgba(155, 199, 179, 0.22);
+}
+
+/* =========================
+   Active Methods
+   ========================= */
+
+/* Target methods receive a quiet highlight while an action is selected. */
+.method.active {
+    color: #ffffff;
+    background: rgba(108, 167, 186, 0.07);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.attacker .method.active {
+    box-shadow: inset 3px 0 0 var(--attacker);
+}
+
+.defender .method.active {
+    box-shadow: inset 3px 0 0 var(--defender);
+}
+
+/* The selected source method keeps a soft pulse until another action is selected. */
+.method.active-source {
+    position: relative;
+    z-index: 1;
+    color: #ffffff;
+    animation: method-pulse 1.8s ease-in-out infinite;
+}
+
+.attacker .method.active-source {
+    background: rgba(132, 98, 99, 0.11);
+    box-shadow:
+        inset 3px 0 0 var(--attacker),
+        0 0 8px rgba(132, 98, 99, 0.35),
+        0 0 18px rgba(132, 98, 99, 0.12);
+}
+
+.defender .method.active-source {
+    background: rgba(97, 120, 110, 0.11);
+    box-shadow:
+        inset 3px 0 0 var(--defender),
+        0 0 8px rgba(97, 120, 110, 0.35),
+        0 0 18px rgba(97, 120, 110, 0.12);
+}
+
+@keyframes method-pulse {
+    0%,
+    100% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.35);
+    }
+}
+

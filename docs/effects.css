@@ -1,0 +1,148 @@
+/* =========================
+   Victim State
+   ========================= */
+
+/* The object being attacked receives a subtle warning glow. */
+.victim .class-card.under-attack {
+    background: rgba(132, 70, 74, 0.08);
+    box-shadow:
+        inset 0 0 0 1px rgba(185, 91, 96, 0.45),
+        inset 0 0 22px rgba(185, 91, 96, 0.08),
+        0 0 12px rgba(185, 91, 96, 0.12);
+    animation: victim-pulse 2s ease-in-out infinite;
+}
+
+@keyframes victim-pulse {
+    0%,
+    100% {
+        box-shadow:
+            inset 0 0 0 1px rgba(185, 91, 96, 0.35),
+            inset 0 0 18px rgba(185, 91, 96, 0.05),
+            0 0 8px rgba(185, 91, 96, 0.08);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 0 0 1px rgba(210, 105, 110, 0.65),
+            inset 0 0 26px rgba(210, 105, 110, 0.11),
+            0 0 16px rgba(210, 105, 110, 0.18);
+    }
+}
+
+/* The object being protected receives a subtle defender-colour glow. */
+.victim .class-card.under-defense {
+    background: rgba(97, 120, 110, 0.08);
+    box-shadow:
+        inset 0 0 0 1px rgba(110, 165, 140, 0.45),
+        inset 0 0 22px rgba(110, 165, 140, 0.08),
+        0 0 12px rgba(110, 165, 140, 0.12);
+    animation: defense-pulse 2s ease-in-out infinite;
+}
+
+@keyframes defense-pulse {
+    0%,
+    100% {
+        box-shadow:
+            inset 0 0 0 1px rgba(110, 165, 140, 0.35),
+            inset 0 0 18px rgba(110, 165, 140, 0.05),
+            0 0 8px rgba(110, 165, 140, 0.08);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 0 0 1px rgba(135, 195, 165, 0.65),
+            inset 0 0 26px rgba(135, 195, 165, 0.11),
+            0 0 16px rgba(135, 195, 165, 0.18);
+    }
+}
+
+/* =========================
+   Circuit Network
+   ========================= */
+
+/* The SVG sits behind the panels and keeps the permanent network very subtle. */
+.circuit-layer {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.circuit-line {
+    fill: none;
+    stroke-width: 1;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    opacity: 0.18;
+}
+
+.circuit-bus {
+    stroke-width: 1;
+}
+
+.circuit-line.attack-line {
+    stroke: var(--attacker);
+}
+
+.circuit-line.defender-line {
+    stroke: var(--defender);
+}
+
+.circuit-node {
+    stroke: none;
+    opacity: 0.22;
+}
+
+.circuit-node.attack-node {
+    fill: var(--attacker);
+}
+
+.circuit-node.defender-node {
+    fill: var(--defender);
+}
+
+/* =========================
+   Travelling Circuit Light
+   ========================= */
+
+/* A short bright dash repeatedly travels over the active route. */
+.circuit-active {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 16 150;
+    stroke-dashoffset: 166;
+    pointer-events: none;
+    animation: circuit-travel 1.35s linear infinite;
+}
+
+.circuit-active.attack-active {
+    stroke: #d39b9d;
+    filter:
+        drop-shadow(0 0 3px rgba(211, 155, 157, 0.8))
+        drop-shadow(0 0 7px rgba(211, 155, 157, 0.35));
+}
+
+.circuit-active.defender-active {
+    stroke: #9bc7b3;
+    filter:
+        drop-shadow(0 0 3px rgba(155, 199, 179, 0.8))
+        drop-shadow(0 0 7px rgba(155, 199, 179, 0.35));
+}
+
+@keyframes circuit-travel {
+    from {
+        stroke-dashoffset: 166;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+

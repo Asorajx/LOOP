@@ -1,0 +1,82 @@
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 1100px) {
+    .cyber-space {
+        gap: 36px;
+    }
+}
+
+@media (max-width: 900px) {
+    .page {
+        padding: 24px 20px 32px;
+    }
+
+    .cyber-space {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .space {
+        min-height: 0;
+        height: auto;
+    }
+
+    .space-content {
+        overflow: visible;
+    }
+
+    .class-header {
+        font-size: 15px;
+    }
+
+    .circuit-layer {
+        display: none;
+    }
+
+    .method {
+        height: 42px;
+        font-size: 14px;
+    }
+
+    header {
+        grid-template-columns: minmax(0, 1fr) auto;
+        row-gap: 14px;
+        padding-bottom: 14px;
+    }
+
+    .header-playback {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-self: center;
+        margin-top: 0;
+    }
+
+    .playback-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .state-change-bar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 0;
+    }
+
+    .state-change-list {
+        width: 100%;
+        padding: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .method.active-source,
+    .source-line,
+    .victim .class-card.under-attack,
+    .victim .class-card.under-defense,
+    .circuit-active {
+        animation: none;
+    }
+}
