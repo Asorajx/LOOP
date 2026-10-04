@@ -84,15 +84,64 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 42px;
-    padding: 0 18px;
+    gap: 12px;
+    min-height: 48px;
+    padding: 6px 18px;
     font-family: "Courier New", monospace;
     font-size: 14px;
     font-weight: 600;
     border-bottom: 1px solid var(--border-soft);
 }
 
+.class-identity {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.class-name {
+    overflow-wrap: anywhere;
+}
+
+.instance-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
+}
+
+.instance-label {
+    color: #465560;
+    font-size: 8px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+}
+
+.instance-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 15px;
+    padding: 1px 5px;
+    color: #7c8993;
+    background: rgba(255, 255, 255, 0.012);
+    border: 1px solid #26333c;
+    border-radius: 2px;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    transition:
+        color 0.16s ease,
+        background-color 0.16s ease,
+        border-color 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
 .class-type {
+    flex: 0 0 auto;
     color: #52616d;
     font-size: 10px;
     font-weight: 400;

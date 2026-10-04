@@ -615,6 +615,7 @@ async function playExecutionEvent(event, token) {
     const circuitType = findCircuitType(rootSourceId);
 
     renderTerminalEvent(event, currentEventIndex);
+    highlightEventInstances(event);
 
     if (event.event_type === "METHOD_STARTED") {
         const parentSourceId = playbackMethodStack[playbackMethodStack.length - 1];
@@ -660,6 +661,7 @@ async function rebuildPlaybackTo(targetIndex) {
 
     for (let index = 0; index < safeTarget; index += 1) {
         const event = executionEvents[index];
+        highlightEventInstances(event);
 
         if (event.event_type === "METHOD_STARTED") {
             const parentSourceId = playbackMethodStack[playbackMethodStack.length - 1];

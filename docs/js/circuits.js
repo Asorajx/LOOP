@@ -1,6 +1,4 @@
-/* =========================
-   Circuit Helpers
-   ========================= */
+/* ========================= Circuit Helpers ========================= */
 
 function createCircuitPath(svg, pathData, className) {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -47,10 +45,7 @@ function getBusX(network, spaceRect) {
     return sourceEdge + (targetEdge - sourceEdge) / 2;
 }
 
-   
-/* =========================
-   Static Circuit Network
-   ========================= */
+/* ========================= Static Circuit Network ========================= */
 
 function drawCircuitLines() {
     const space = document.getElementById("cyber-space");
@@ -110,10 +105,76 @@ function drawBranch(id, type, isSource, network, busX, spaceRect, svg) {
     addCircuitNode(svg, busX, y, type);
 }
 
-
 /* =========================
    Active Circuit Interaction
    ========================= */
+
+function getInstanceChip(objectId) {
+    if (!objectId) return null;
+
+    return Array.from(document.querySelectorAll(".instance-chip"))
+        .find(chip => chip.dataset.objectId === String(objectId)) || null;
+}
+
+function clearInstanceHighlights() {
+    document
+        .querySelectorAll(
+            ".instance-chip.active-instance, " +
+            ".instance-chip.target-instance, " +
+            ".instance-chip.under-attack, " +
+            ".instance-chip.under-defense"
+        )
+        .forEach(function(chip) {
+            chip.classList.remove(
+                "active-instance",
+                "target-instance",
+                "under-attack",
+                "under-defense"
+            );
+        });
+}
+
+function getInteractionType() {
+    const rootSourceId = currentRootButton?.id;
+    if (!rootSourceId) return null;
+
+    if (rootSourceId === "attacker-perform") return "attack";
+    if (rootSourceId.startsWith("defender-")) return "defender";
+
+    return findCircuitType(rootSourceId) || null;
+}
+
+function getInteractionTargetId() {
+    const rootEvent = executionEvents.find(function(event) {
+        return event.event_type === "METHOD_STARTED" && event.target_id;
+    });
+
+    return rootEvent?.target_id || null;
+}
+
+function highlightEventInstances(event) {
+    clearInstanceHighlights();
+    if (!event) return;
+
+    const activeInstance = getInstanceChip(event.object_id);
+    const directTarget = getInstanceChip(event.target_id);
+    const interactionTarget = getInstanceChip(getInteractionTargetId());
+    const interactionType = getInteractionType();
+
+    activeInstance?.classList.add("active-instance");
+
+    if (directTarget && directTarget !== activeInstance) {
+        directTarget.classList.add("target-instance");
+    }
+
+    if (interactionTarget && interactionType === "attack") {
+        interactionTarget.classList.add("under-attack");
+    }
+
+    if (interactionTarget && interactionType === "defender") {
+        interactionTarget.classList.add("under-defense");
+    }
+}
 
 function clearActiveVisuals() {
     document.querySelectorAll(".circuit-active").forEach(path => path.remove());
@@ -122,6 +183,7 @@ function clearActiveVisuals() {
         .forEach(function(element) {
             element.classList.remove("active", "active-source", "under-attack", "under-defense");
         });
+    clearInstanceHighlights();
     activeCircuit = null;
 }
 
@@ -154,10 +216,6 @@ function activateTarget(type, sourceId, targetId) {
     if (target?.classList.contains("method")) {
         target.classList.add("active");
     }
-
-    target?.closest(".class-card")?.classList.add(
-        type === "attack" ? "under-attack" : "under-defense"
-    );
 
     activeCircuit = { type, sourceId, targetId };
     animateRoute(type, network, sourceId, targetId);

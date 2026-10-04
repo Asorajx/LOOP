@@ -13,12 +13,9 @@
 </head>
 <body>
 <div class="page">
-
-
     <!-- =========================
          Header
          ========================= -->
-
     <header>
         <div class="brand">
             <h1>CO-OP</h1>
@@ -41,18 +38,13 @@
         <div class="scenario">Cyber Space</div>
     </header>
 
-
     <!-- =========================
          Main Interface
          ========================= -->
-
     <main>
-
-
         <!-- =========================
              Terminal
              ========================= -->
-
         <section class="terminal" id="terminal" aria-label="Execution terminal">
             <div class="terminal-header">
                 <span class="terminal-title">Terminal</span>
@@ -88,7 +80,13 @@
                 <div class="space-content">
                     <div class="class-card">
                         <div class="class-header">
-                            <span>Attacker</span>
+                            <div class="class-identity">
+                                <span class="class-name">Attacker</span>
+                                <div class="instance-list" aria-label="Attacker object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="Attacker 1">Attacker 1</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="attacker-perform" data-source="attacker-perform">perform_attack()</button>
@@ -96,7 +94,13 @@
 
                     <div class="class-card" id="credential-attack">
                         <div class="class-header">
-                            <span>CredentialAttack</span>
+                            <div class="class-identity">
+                                <span class="class-name">CredentialAttack</span>
+                                <div class="instance-list" aria-label="CredentialAttack object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="Credential Attack">Credential Attack</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="credential-execute" data-source="credential-execute">execute()</button>
@@ -104,7 +108,13 @@
 
                     <div class="class-card" id="mitm-attack">
                         <div class="class-header">
-                            <span>MitMAttack</span>
+                            <div class="class-identity">
+                                <span class="class-name">MitMAttack</span>
+                                <div class="instance-list" aria-label="MitMAttack object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="MITM Attack">MITM Attack</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="mitm-execute" data-source="mitm-execute">execute()</button>
@@ -112,7 +122,13 @@
 
                     <div class="class-card" id="dos-attack">
                         <div class="class-header">
-                            <span>DoSAttack</span>
+                            <div class="class-identity">
+                                <span class="class-name">DoSAttack</span>
+                                <div class="instance-list" aria-label="DoSAttack object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="DoS Attack">DoS Attack</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="dos-execute" data-source="dos-execute">execute()</button>
@@ -121,7 +137,13 @@
                     <div class="class-card inherited" id="ddos-attack">
                         <div class="inheritance">inherits DoSAttack</div>
                         <div class="class-header">
-                            <span>DDoSAttack</span>
+                            <div class="class-identity">
+                                <span class="class-name">DDoSAttack</span>
+                                <div class="instance-list" aria-label="DDoSAttack object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="DDoS Attack">DDoS Attack</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="ddos-execute" data-source="ddos-execute">execute()</button>
@@ -129,7 +151,13 @@
 
                     <div class="class-card" id="malware-attack">
                         <div class="class-header">
-                            <span>MalwareAttack</span>
+                            <div class="class-identity">
+                                <span class="class-name">MalwareAttack</span>
+                                <div class="instance-list" aria-label="MalwareAttack object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="Malware Attack">Malware Attack</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="malware-execute" data-source="malware-execute">execute()</button>
@@ -138,7 +166,13 @@
                     <div class="class-card inherited" id="ransomware-attack">
                         <div class="inheritance">inherits MalwareAttack</div>
                         <div class="class-header">
-                            <span>RansomwareAttack</span>
+                            <div class="class-identity">
+                                <span class="class-name">RansomwareAttack</span>
+                                <div class="instance-list" aria-label="RansomwareAttack object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="Ransomware Attack">Ransomware Attack</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="ransomware-execute" data-source="ransomware-execute">execute()</button>
@@ -154,7 +188,14 @@
                 <div class="space-content">
                     <div class="class-card" id="network-device">
                         <div class="class-header">
-                            <span>NetworkDevice</span>
+                            <div class="class-identity">
+                                <span class="class-name">NetworkDevice</span>
+                                <div class="instance-list" aria-label="NetworkDevice object instances">
+                                    <span class="instance-label">OBJECTS</span>
+                                    <span class="instance-chip" data-object-id="DEV001" title="Web Server">DEV001</span>
+                                    <span class="instance-chip" data-object-id="DEV002" title="Database Server">DEV002</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="device-increase-risk" data-source="device-increase-risk">increase_risk()</button>
@@ -168,7 +209,13 @@
 
                     <div class="class-card" id="connection">
                         <div class="class-header">
-                            <span>Connection</span>
+                            <div class="class-identity">
+                                <span class="class-name">Connection</span>
+                                <div class="instance-list" aria-label="Connection object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="CON001" title="DEV001 to DEV002">CON001</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="connection-intercept" data-source="connection-intercept">intercept()</button>
@@ -187,7 +234,13 @@
                 <div class="space-content">
                     <div class="class-card">
                         <div class="class-header">
-                            <span>Defender</span>
+                            <div class="class-identity">
+                                <span class="class-name">Defender</span>
+                                <div class="instance-list" aria-label="Defender object instances">
+                                    <span class="instance-label">OBJECT</span>
+                                    <span class="instance-chip" data-object-id="Defender 1">Defender 1</span>
+                                </div>
+                            </div>
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="defender-inspect" data-source="defender-inspect">inspect()</button>
@@ -206,7 +259,6 @@
     <!-- =========================
          Footer
          ========================= -->
-
     <footer>
         <span>Scenario / Cybersecurity</span>
         <span id="system-status">System Ready</span>
@@ -216,7 +268,6 @@
 <!-- =========================
      Scripts
      ========================= -->
-
 <script src="js/config.js"></script>
 <script src="js/source.js"></script>
 <script src="js/circuits.js"></script>
