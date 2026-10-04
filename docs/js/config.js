@@ -203,6 +203,31 @@ const parentCallPatterns = {
 };
 
 /* =========================
+   Inheritance Calls
+   ========================= */
+
+const inheritanceCalls = {
+    "ddos-execute": {
+        parentSourceId: "dos-execute",
+        childLabel: "DDoSAttack.execute()",
+        parentLabel: "DoSAttack.execute()",
+        objectLabel: "DDoS Attack",
+        code: "This parent method is running because DDoSAttack.execute() called super().execute(target). It increases risk and sets traffic to HIGH.",
+        description: "Reuses the basic DoS behaviour on the same DDoS Attack object before the child method adds its stronger behaviour.",
+        oopConcepts: "Inheritance · Code Reuse · super()"
+    },
+    "ransomware-execute": {
+        parentSourceId: "malware-execute",
+        childLabel: "RansomwareAttack.execute()",
+        parentLabel: "MalwareAttack.execute()",
+        objectLabel: "Ransomware Attack",
+        code: "This parent method is running because RansomwareAttack.execute() called super().execute(target). It performs the normal MalwareAttack risk increase first.",
+        description: "Reuses the basic malware behaviour on the same Ransomware Attack object before the child method adds more risk and locks files.",
+        oopConcepts: "Inheritance · Code Reuse · super()"
+    }
+};
+
+/* =========================
    Terminal Explanations
    ========================= */
 

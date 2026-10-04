@@ -180,4 +180,78 @@
     }
 }
 
+/* =========================
+   Inherited Method Calls
+   ========================= */
 
+.method.inheritance-child-call {
+    color: #e6dff2;
+    background: rgba(127, 111, 168, 0.07);
+    box-shadow: inset 3px 0 0 rgba(166, 147, 209, 0.54);
+}
+
+.method.inheritance-parent-call {
+    color: #f3eefb;
+    background: rgba(127, 111, 168, 0.15);
+    box-shadow:
+        inset 3px 0 0 #a693d1,
+        0 0 9px rgba(127, 111, 168, 0.16);
+}
+
+.method.inheritance-child-call::before,
+.method.inheritance-parent-call::before {
+    color: #a693d1;
+}
+
+.inheritance.inheritance-call-active {
+    color: #b9a9dc;
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(166, 147, 209, 0.22);
+}
+
+.inheritance.inheritance-call-active::before {
+    content: "↑ ";
+    color: #a693d1;
+}
+
+/* =========================
+   Terminal Inherited Call
+   ========================= */
+
+.terminal-entry.inherited-call {
+    background: rgba(127, 111, 168, 0.055);
+}
+
+.terminal-inherited-call {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 5px 12px;
+    margin-top: 8px;
+    padding: 7px 9px;
+    background: rgba(127, 111, 168, 0.07);
+    border-left: 2px solid rgba(166, 147, 209, 0.72);
+}
+
+.terminal-inherited-label {
+    grid-row: 1 / span 2;
+    color: #a693d1;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.terminal-inherited-route {
+    color: #e4deed;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.terminal-inherited-copy {
+    color: #9da8b1;
+    font-size: 12px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}

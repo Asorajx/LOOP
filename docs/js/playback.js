@@ -101,12 +101,14 @@ function clearPlaybackSession() {
     isPlaying = false;
     isProcessingEvent = false;
     resetPlaybackPosition();
+    clearInheritanceCallVisual();
     updatePlaybackControls();
 }
 
 function resetPlaybackVisuals() {
     clearAllLineHighlights();
     clearActiveVisuals();
+    clearInheritanceCallVisual();
     clearStateChanges();
     currentRootButton?.classList.add("active-source");
 }
@@ -336,6 +338,82 @@ function removeMethodFromStack(sourceId) {
 }
 
 /* =========================
+   Inheritance Visualization
+   ========================= */
+
+let activeInheritanceCallKey = null;
+
+function getInheritanceCall(childSourceId, parentSourceId) {
+    const call = inheritanceCalls[childSourceId];
+    if (!call || call.parentSourceId !== parentSourceId) return null;
+    return call;
+}
+
+function clearInheritanceCallVisual() {
+    document.querySelectorAll(".inheritance-child-call").forEach(function(element) {
+        element.classList.remove("inheritance-child-call");
+    });
+
+    document.querySelectorAll(".inheritance-parent-call").forEach(function(element) {
+        element.classList.remove("inheritance-parent-call");
+    });
+
+    document.querySelectorAll(".inheritance-call-active").forEach(function(label) {
+        if (label.dataset.inheritanceOriginalText) {
+            label.textContent = label.dataset.inheritanceOriginalText;
+        }
+        label.classList.remove("inheritance-call-active");
+    });
+
+    activeInheritanceCallKey = null;
+}
+
+function showInheritanceCallVisual(childSourceId, parentSourceId) {
+    const call = getInheritanceCall(childSourceId, parentSourceId);
+    if (!call) {
+        clearInheritanceCallVisual();
+        return;
+    }
+
+    const key = `${childSourceId}->${parentSourceId}`;
+    if (activeInheritanceCallKey === key) return;
+
+    clearInheritanceCallVisual();
+
+    const childButton = document.getElementById(childSourceId);
+    const parentButton = document.getElementById(parentSourceId);
+    const inheritanceLabel = childButton?.closest(".class-card")?.querySelector(".inheritance");
+
+    childButton?.classList.add("inheritance-child-call");
+    parentButton?.classList.add("inheritance-parent-call");
+
+    if (inheritanceLabel) {
+        if (!inheritanceLabel.dataset.inheritanceOriginalText) {
+            inheritanceLabel.dataset.inheritanceOriginalText = inheritanceLabel.textContent.trim();
+        }
+
+        inheritanceLabel.textContent = `super(): ${call.childLabel} → ${call.parentLabel}`;
+        inheritanceLabel.classList.add("inheritance-call-active");
+    }
+
+    activeInheritanceCallKey = key;
+}
+
+function syncInheritanceCallVisual() {
+    for (let index = 0; index < playbackMethodStack.length - 1; index += 1) {
+        const childSourceId = playbackMethodStack[index];
+        const parentSourceId = playbackMethodStack[index + 1];
+
+        if (getInheritanceCall(childSourceId, parentSourceId)) {
+            showInheritanceCallVisual(childSourceId, parentSourceId);
+            return;
+        }
+    }
+
+    clearInheritanceCallVisual();
+}
+
+/* =========================
    Terminal
    ========================= */
 
@@ -426,6 +504,10 @@ function createTerminalEntry(event, eventIndex, parentEvent) {
     }
 
     const methodLabel = `${event.class_name}.${event.method_name}()`;
+    const inheritedCall = event.event_type === "METHOD_STARTED"
+        ? getInheritanceCall(parentEvent?.source_id, event.source_id)
+        : null;
+
     head.appendChild(createTerminalText("terminal-entry-title", methodLabel));
     entry.append(number, head);
 
@@ -443,8 +525,25 @@ function createTerminalEntry(event, eventIndex, parentEvent) {
         entry.appendChild(createTerminalText("terminal-message", event.message));
     }
 
+    if (inheritedCall) {
+        entry.classList.add("inherited-call");
+
+        const inherited = document.createElement("div");
+        inherited.className = "terminal-inherited-call";
+        inherited.appendChild(createTerminalText("terminal-inherited-label", "Inherited Call"));
+        inherited.appendChild(createTerminalText(
+            "terminal-inherited-route",
+            `${inheritedCall.childLabel} → ${inheritedCall.parentLabel}`
+        ));
+        inherited.appendChild(createTerminalText(
+            "terminal-inherited-copy",
+            `super() reuses the parent implementation on the same ${inheritedCall.objectLabel} object.`
+        ));
+        entry.appendChild(inherited);
+    }
+
     if (event.event_type === "METHOD_STARTED") {
-        const explanation = getTerminalExplanation(event.source_id);
+        const explanation = inheritedCall || getTerminalExplanation(event.source_id);
         const details = document.createElement("div");
         details.className = "terminal-explanation";
         details.appendChild(createExplanationRow("Code", explanation.code));
@@ -635,6 +734,7 @@ async function playExecutionEvent(event, token) {
         }
 
         playbackMethodStack.push(event.source_id);
+        syncInheritanceCallVisual();
     }
 
     for (const pattern of getEventPatterns(event)) {
@@ -644,6 +744,7 @@ async function playExecutionEvent(event, token) {
 
     if (event.event_type === "METHOD_COMPLETED") {
         removeMethodFromStack(event.source_id);
+        syncInheritanceCallVisual();
     }
 
     await wait(PLAYBACK_DELAY);
@@ -681,6 +782,7 @@ async function rebuildPlaybackTo(targetIndex) {
             }
 
             playbackMethodStack.push(event.source_id);
+            syncInheritanceCallVisual();
         }
 
         for (const pattern of getEventPatterns(event)) {
@@ -690,6 +792,7 @@ async function rebuildPlaybackTo(targetIndex) {
 
         if (event.event_type === "METHOD_COMPLETED") {
             removeMethodFromStack(event.source_id);
+            syncInheritanceCallVisual();
         }
 
         currentEventIndex = index + 1;
