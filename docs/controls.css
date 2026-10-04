@@ -225,7 +225,7 @@
 }
 
 .terminal-log {
-    height: 220px;
+    height: 260px;
     padding: 10px 14px 14px;
     overflow-y: auto;
     scroll-behavior: smooth;
@@ -402,7 +402,7 @@
 footer {
     display: flex;
     align-items: flex-end;
-    justify-content: space-between;
+    justify-content: flex-end;
     height: 28px;
     color: #46545f;
     font-family: "Courier New", monospace;

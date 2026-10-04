@@ -80,8 +80,23 @@ header {
 
 .scenario {
     justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Courier New", monospace;
+}
+
+.scenario-label {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.scenario-name {
     color: var(--text);
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 /* =========================
