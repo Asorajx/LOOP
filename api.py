@@ -1,6 +1,16 @@
 import inspect
 import textwrap
 from pathlib import Path
+from collections import defaultdict, deque
+from contextvars import ContextVar
+from dataclasses import dataclass, field
+import asyncio
+import secrets
+import time
+from typing import Literal
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -28,55 +38,134 @@ DOCS_DIR = BASE_DIR / "docs"
 
 
 # =========================
-# Simulation Objects
+# Validated request types
 # =========================
 
-device1 = NetworkDevice("DEV001", "Web Server")
-device2 = NetworkDevice("DEV002", "Database Server")
+class TargetPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    target: Literal["DEV001", "DEV002", "CON001"]
 
-connection = Connection("CON001", device1, device2)
+class AttackPayload(TargetPayload):
+    attack: Literal["credential", "mitm", "dos", "ddos", "malware", "ransomware"]
 
-credential = CredentialAttack()
-mitm = MitMAttack()
-dos = DoSAttack()
-ddos = DDoSAttack()
-malware = MalwareAttack()
-ransomware = RansomwareAttack()
+class ExecutePayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    target: Literal["DEV001", "DEV002", "CON001"] | None = None
+    attack: Literal["credential", "mitm", "dos", "ddos", "malware", "ransomware"] | None = None
+    amount: StrictInt = Field(default=1, ge=0, le=3)
+    traffic_level: Literal["NORMAL", "HIGH", "CRITICAL"] = "HIGH"
 
-attacker = Attacker(
-    "Attacker 1",
-    [
-        credential,
-        mitm,
-        dos,
-        ddos,
-        malware,
-        ransomware
-    ]
-)
 
-defender = Defender("Defender 1")
+# =========================
+# Independent simulation sessions
+# =========================
 
-simulation = CyberDefenseSimulation(
-    attacker,
-    defender,
-    [device1, device2],
-    [connection]
-)
+@dataclass
+class Session:
+    simulation: CyberDefenseSimulation
+    attacks: dict
+    last_seen: float
+    lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+
+
+def new_session() -> Session:
+    device1 = NetworkDevice("DEV001", "Web Server")
+    device2 = NetworkDevice("DEV002", "Database Server")
+    connection = Connection("CON001", device1, device2)
+    attacks = {
+        "credential": CredentialAttack(),
+        "mitm": MitMAttack(),
+        "dos": DoSAttack(),
+        "ddos": DDoSAttack(),
+        "malware": MalwareAttack(),
+        "ransomware": RansomwareAttack(),
+    }
+    attacker = Attacker("Attacker 1", list(attacks.values()))
+    defender = Defender("Defender 1")
+    simulation = CyberDefenseSimulation(attacker, defender, [device1, device2], [connection])
+    return Session(simulation, attacks, time.monotonic())
+
+
+SESSION_COOKIE = "loop_session"
+SESSION_TTL_SECONDS = 60 * 60
+MAX_SESSIONS = 1000
+SESSIONS = {}
+SESSION_CONTEXT = ContextVar("loop_session_context", default=None)
+# Lightweight in-process limits. For multi-worker/multi-instance deployments use
+# a shared Redis-backed store instead.
+IP_ATTEMPTS = defaultdict(deque)
+SESSION_ATTEMPTS = defaultdict(deque)
+RATE_WINDOW = 60
+IP_LIMIT = 240
+SESSION_LIMIT = 100
+
+
+def current_session() -> Session:
+    session = SESSION_CONTEXT.get()
+    if session is None:
+        raise RuntimeError("A simulation session is required")
+    return session
+
+
+def within_limit(bucket, key, maximum, now):
+    attempts = bucket[key]
+    while attempts and attempts[0] <= now - RATE_WINDOW:
+        attempts.popleft()
+    if len(attempts) >= maximum:
+        return False
+    attempts.append(now)
+    return True
+
+
+@app.middleware("http")
+async def simulation_session_middleware(request: Request, call_next):
+    if not request.url.path.startswith("/api/"):
+        return await call_next(request)
+
+    now = time.monotonic()
+    # client.host is the server-known peer; never trust arbitrary X-Forwarded-For.
+    ip = request.client.host if request.client else "unknown"
+    if not within_limit(IP_ATTEMPTS, ip, IP_LIMIT, now):
+        return JSONResponse({"detail": "Too many requests"}, status_code=429,
+                            headers={"Retry-After": "60"})
+
+    session_id = request.cookies.get(SESSION_COOKIE)
+    session = SESSIONS.get(session_id) if session_id else None
+    is_new = session is None
+    if session is None:
+        if len(SESSIONS) >= MAX_SESSIONS:
+            for key, item in list(SESSIONS.items()):
+                if now - item.last_seen > SESSION_TTL_SECONDS and not item.lock.locked():
+                    SESSIONS.pop(key, None)
+                    SESSION_ATTEMPTS.pop(key, None)
+        if len(SESSIONS) >= MAX_SESSIONS:
+            return JSONResponse({"detail": "Server busy"}, status_code=503)
+        session_id = secrets.token_urlsafe(32)
+        session = new_session()
+        SESSIONS[session_id] = session
+
+    if not within_limit(SESSION_ATTEMPTS, session_id, SESSION_LIMIT, now):
+        return JSONResponse({"detail": "Too many requests"}, status_code=429,
+                            headers={"Retry-After": "60"})
+
+    async with session.lock:
+        session.last_seen = now
+        token = SESSION_CONTEXT.set(session)
+        try:
+            response = await call_next(request)
+        finally:
+            SESSION_CONTEXT.reset(token)
+    if is_new:
+        response.set_cookie(SESSION_COOKIE, session_id, httponly=True,
+                            secure=request.url.scheme == "https", samesite="lax",
+                            max_age=SESSION_TTL_SECONDS, path="/")
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 # =========================
 # Lookups
 # =========================
-
-attacks = {
-    "credential": credential,
-    "mitm": mitm,
-    "dos": dos,
-    "ddos": ddos,
-    "malware": malware,
-    "ransomware": ransomware
-}
 
 source_methods = {
     "attacker-perform": Attacker.perform_attack,
@@ -133,12 +222,12 @@ event_source_ids = {
 }
 
 attack_sources = {
-    "credential-execute": (credential, "DEV001"),
-    "mitm-execute": (mitm, "CON001"),
-    "dos-execute": (dos, "DEV001"),
-    "ddos-execute": (ddos, "DEV001"),
-    "malware-execute": (malware, "DEV001"),
-    "ransomware-execute": (ransomware, "DEV001")
+    "credential-execute": ("credential", "DEV001"),
+    "mitm-execute": ("mitm", "CON001"),
+    "dos-execute": ("dos", "DEV001"),
+    "ddos-execute": ("ddos", "DEV001"),
+    "malware-execute": ("malware", "DEV001"),
+    "ransomware-execute": ("ransomware", "DEV001"),
 }
 
 
@@ -146,12 +235,36 @@ attack_sources = {
 # Helper Functions
 # =========================
 
+def validate_attack_target(attack_name, target_id):
+    from fastapi import HTTPException
+    if (target_id == "CON001") != (attack_name == "mitm"):
+        raise HTTPException(status_code=422, detail="Invalid target for attack")
+
+
+def validate_execute_target(source_id, data):
+    from fastapi import HTTPException
+    if source_id not in source_methods:
+        raise HTTPException(status_code=404, detail="Unknown source")
+    target = data.get("target")
+    if source_id == "attacker-perform":
+        if target is not None:
+            validate_attack_target(data.get("attack", "credential"), target)
+    elif source_id in attack_sources:
+        if target is not None:
+            validate_attack_target(attack_sources[source_id][0], target)
+    elif source_id.startswith("connection-") or source_id == "defender-secure":
+        if target is not None and target != "CON001":
+            raise HTTPException(status_code=422, detail="Connection target required")
+    elif target == "CON001":
+        raise HTTPException(status_code=422, detail="Device target required")
+
+
 def get_target(target_id):
-    for device in simulation.devices:
+    for device in current_session().simulation.devices:
         if device.device_id == target_id:
             return device
 
-    for connection_item in simulation.connections:
+    for connection_item in current_session().simulation.connections:
         if connection_item.connection_id == target_id:
             return connection_item
 
@@ -179,17 +292,17 @@ def get_event_data(event):
 def get_response(success=True):
     events = [
         get_event_data(event)
-        for event in simulation.tracer.events
+        for event in current_session().simulation.tracer.events
     ]
 
     devices = [
         device.get_data()
-        for device in simulation.devices
+        for device in current_session().simulation.devices
     ]
 
     connections = [
         connection_item.get_data()
-        for connection_item in simulation.connections
+        for connection_item in current_session().simulation.connections
     ]
 
     return {
@@ -205,7 +318,7 @@ def execute_source(source_id, data):
 
     if source_id == "attacker-perform":
         attack_name = data.get("attack", "credential")
-        attack = attacks.get(attack_name)
+        attack = current_session().attacks.get(attack_name)
 
         if attack is None:
             return False, "Attack not found.", None
@@ -216,10 +329,11 @@ def execute_source(source_id, data):
         if target is None:
             return False, "Target not found.", None
 
-        return True, "", simulation.perform_attack(attack, target)
+        return True, "", current_session().simulation.perform_attack(attack, target)
 
     if source_id in attack_sources:
-        attack, default_target = attack_sources[source_id]
+        attack_name, default_target = attack_sources[source_id]
+        attack = current_session().attacks[attack_name]
         target = get_target(target_id or default_target)
 
         if target is None:
@@ -301,36 +415,36 @@ def execute_source(source_id, data):
     if source_id == "defender-inspect":
         if device is None:
             return False, "Device not found.", None
-        return True, "", simulation.inspect(device)
+        return True, "", current_session().simulation.inspect(device)
 
     if source_id == "defender-block":
         if device is None:
             return False, "Device not found.", None
-        simulation.block(device)
+        current_session().simulation.block(device)
         return True, "", None
 
     if source_id == "defender-unblock":
         if device is None:
             return False, "Device not found.", None
-        simulation.unblock(device)
+        current_session().simulation.unblock(device)
         return True, "", None
 
     if source_id == "defender-isolate":
         if device is None:
             return False, "Device not found.", None
-        simulation.isolate(device)
+        current_session().simulation.isolate(device)
         return True, "", None
 
     if source_id == "defender-restore":
         if device is None:
             return False, "Device not found.", None
-        simulation.restore(device)
+        current_session().simulation.restore(device)
         return True, "", None
 
     if source_id == "defender-secure":
         if connection_target is None:
             return False, "Connection not found.", None
-        simulation.secure_connection(connection_target)
+        current_session().simulation.secure_connection(connection_target)
         return True, "", None
 
     return False, "Executable source not found.", None
@@ -362,7 +476,7 @@ def get_source(source_id: str):
 
 @app.get("/api/state")
 def get_state():
-    simulation.tracer.clear()
+    current_session().simulation.tracer.clear()
     return get_response()
 
 
@@ -371,8 +485,10 @@ def get_state():
 # =========================
 
 @app.post("/api/execute/{source_id}")
-def execute_method(source_id: str, data: dict):
-    simulation.tracer.clear()
+def execute_method(source_id: str, data: ExecutePayload):
+    data = data.model_dump(exclude_none=True)
+    validate_execute_target(source_id, data)
+    current_session().simulation.tracer.clear()
     success, message, result = execute_source(source_id, data)
 
     if not success:
@@ -390,13 +506,15 @@ def execute_method(source_id: str, data: dict):
 # =========================
 
 @app.post("/api/attack")
-def perform_attack(data: dict):
-    simulation.tracer.clear()
+def perform_attack(data: AttackPayload):
+    data = data.model_dump()
+    validate_attack_target(data["attack"], data["target"])
+    current_session().simulation.tracer.clear()
 
     attack_name = data.get("attack")
     target_id = data.get("target")
 
-    attack = attacks.get(attack_name)
+    attack = current_session().attacks.get(attack_name)
     target = get_target(target_id)
 
     if attack is None:
@@ -411,7 +529,7 @@ def perform_attack(data: dict):
             "message": "Target not found."
         }
 
-    result = simulation.perform_attack(attack, target)
+    result = current_session().simulation.perform_attack(attack, target)
     return get_response(result)
 
 
@@ -420,8 +538,12 @@ def perform_attack(data: dict):
 # =========================
 
 @app.post("/api/block")
-def block(data: dict):
-    simulation.tracer.clear()
+def block(data: TargetPayload):
+    data = data.model_dump()
+    if data["target"] == "CON001":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Device target required")
+    current_session().simulation.tracer.clear()
     target = get_target(data.get("target"))
 
     if target is None:
@@ -430,13 +552,17 @@ def block(data: dict):
             "message": "Target not found."
         }
 
-    simulation.block(target)
+    current_session().simulation.block(target)
     return get_response()
 
 
 @app.post("/api/unblock")
-def unblock(data: dict):
-    simulation.tracer.clear()
+def unblock(data: TargetPayload):
+    data = data.model_dump()
+    if data["target"] == "CON001":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Device target required")
+    current_session().simulation.tracer.clear()
     target = get_target(data.get("target"))
 
     if target is None:
@@ -445,13 +571,17 @@ def unblock(data: dict):
             "message": "Target not found."
         }
 
-    simulation.unblock(target)
+    current_session().simulation.unblock(target)
     return get_response()
 
 
 @app.post("/api/isolate")
-def isolate(data: dict):
-    simulation.tracer.clear()
+def isolate(data: TargetPayload):
+    data = data.model_dump()
+    if data["target"] == "CON001":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Device target required")
+    current_session().simulation.tracer.clear()
     target = get_target(data.get("target"))
 
     if target is None:
@@ -460,13 +590,17 @@ def isolate(data: dict):
             "message": "Target not found."
         }
 
-    simulation.isolate(target)
+    current_session().simulation.isolate(target)
     return get_response()
 
 
 @app.post("/api/restore")
-def restore(data: dict):
-    simulation.tracer.clear()
+def restore(data: TargetPayload):
+    data = data.model_dump()
+    if data["target"] == "CON001":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Device target required")
+    current_session().simulation.tracer.clear()
     target = get_target(data.get("target"))
 
     if target is None:
@@ -475,13 +609,17 @@ def restore(data: dict):
             "message": "Target not found."
         }
 
-    simulation.restore(target)
+    current_session().simulation.restore(target)
     return get_response()
 
 
 @app.post("/api/secure")
-def secure_connection(data: dict):
-    simulation.tracer.clear()
+def secure_connection(data: TargetPayload):
+    data = data.model_dump()
+    if data["target"] != "CON001":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Connection target required")
+    current_session().simulation.tracer.clear()
     target = get_target(data.get("target"))
 
     if target is None:
@@ -490,7 +628,7 @@ def secure_connection(data: dict):
             "message": "Connection not found."
         }
 
-    simulation.secure_connection(target)
+    current_session().simulation.secure_connection(target)
     return get_response()
 
 
@@ -500,7 +638,7 @@ def secure_connection(data: dict):
 
 @app.post("/api/reset")
 def reset():
-    simulation.reset()
+    current_session().simulation.reset()
     return get_response()
 
 
