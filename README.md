@@ -77,4 +77,4 @@ The current version uses a fictional cybersecurity scenario containing attackers
 
 ## Documentation
 
-Full project report: `P03-LOOP.pdf`
+Full project report: [P03-LOOP.pdf](P03-LOOP.pdf)
