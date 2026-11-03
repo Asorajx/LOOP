@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOOP | Cybersecurity</title>
+    <title>LOOP | Learn Python OOP visually</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="/images/loop-favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/loop-favicon-16.png">
@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="effects.css">
     <link rel="stylesheet" href="controls.css">
     <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="learning.css">
 </head>
 <body>
 <div class="page">
@@ -54,25 +55,85 @@
          ========================= -->
 
     <main>
-
-
-        <!-- =========================
-             Terminal
-             ========================= -->
-
-        <section class="terminal" id="terminal" aria-label="Execution terminal">
-            <div class="terminal-header">
-                <span class="terminal-title">Terminal</span>
+        <section class="intro" aria-label="Introduction to LOOP">
+            <div>
+                <span class="intro-eyebrow">LEARN BY WATCHING REAL PYTHON</span>
+                <h2>Understand objects, not just output.</h2>
+                <p>Choose an OOP concept, predict what the code will do, then watch the actual Python objects respond. The execution log is available if you want to dig deeper.</p>
+            </div>
+            <div class="intro-how">
                 <div class="terminal-mode" aria-label="Simulation mode">
                     <span class="terminal-mode-label">Mode</span>
                     <button class="terminal-mode-button active" id="mode-manual" type="button" aria-pressed="true">Manual</button>
                     <button class="terminal-mode-button" id="mode-guided" type="button" aria-pressed="false">Guided</button>
                 </div>
+                <span>01 &nbsp;Learn the idea</span>
+                <span>02 &nbsp;Run an example</span>
+                <span>03 &nbsp;Explain the change</span>
+            </div>
+        </section>
+
+        <section class="learning-studio" aria-label="OOP learning studio">
+            <nav class="lesson-navigation" aria-label="OOP concepts">
+                <div class="learning-overline">LEARNING PATH</div>
+                <h3>Explore OOP</h3>
+                <p>Pick a concept or switch to Guided mode for a six-lesson walkthrough.</p>
+                <div class="lesson-buttons" id="lesson-buttons"></div>
+            </nav>
+            <article class="lesson-content" aria-labelledby="lesson-title">
+                <div class="learning-overline" id="lesson-number">LESSON 01 / 06</div>
+                <h3 id="lesson-title">Classes &amp; objects</h3>
+                <p class="lesson-question" id="lesson-question"></p>
+                <p class="lesson-definition" id="lesson-definition"></p>
+                <div class="lesson-diagram" id="lesson-diagram" aria-label="Concept diagram"></div>
+                <h4>In this project</h4>
+                <p id="lesson-example"></p>
+                <pre class="lesson-code"><code id="lesson-code"></code></pre>
+                <div class="lesson-annotations"><h4>Read the key lines</h4><div id="lesson-annotations"></div></div>
+                <p class="lesson-why" id="lesson-why"></p>
+                <div class="lesson-actions">
+                    <button type="button" class="lesson-run" id="lesson-run">Run this example</button>
+                    <a id="lesson-docs" href="https://docs.python.org/3/tutorial/classes.html" target="_blank" rel="noopener noreferrer">Read Python documentation ↗</a>
+                </div>
+            </article>
+            <aside class="learning-execution" aria-labelledby="learning-step-title">
+                <div class="learning-overline">EXECUTION EXPLAINED</div>
+                <span class="learning-step-count" id="learning-step-count">BEFORE RUNNING</span>
+                <h3 id="learning-step-title">What should you look for?</h3>
+                <p id="learning-step-copy">Start an example to see each Python event explained in plain English.</p>
+                <div class="learning-state" id="learning-state" hidden>
+                    <span class="learning-state-label" id="learning-state-label"></span>
+                    <div class="learning-state-comparison">
+                        <div><span>BEFORE</span><strong id="learning-state-before"></strong></div>
+                        <span class="learning-state-arrow" aria-hidden="true">→</span>
+                        <div><span>AFTER</span><strong id="learning-state-after"></strong></div>
+                    </div>
+                </div>
+                <div class="instance-inspector">
+                    <span class="learning-overline">OBJECT STATE INSPECTOR</span>
+                    <p>State reconstructed from Python's execution events. Each instance has its own values.</p>
+                    <div id="learning-instance-cards" class="instance-cards"></div>
+                </div>
+                <div class="learning-check">
+                    <span class="learning-overline">CHECK YOUR UNDERSTANDING</span>
+                    <h4 id="lesson-check-question"></h4>
+                    <div id="lesson-check-options" class="lesson-check-options"></div>
+                    <p id="lesson-check-feedback" class="lesson-check-feedback" role="status" aria-live="polite"></p>
+                </div>
+            </aside>
+        </section>
+
+        <details class="trace-disclosure" id="trace-disclosure">
+            <summary>Technical execution log <span>Optional · method calls, states and event history</span></summary>
+
+        <section class="terminal" id="terminal" aria-label="Execution terminal">
+            <div class="terminal-header">
+                <span class="terminal-title">Terminal</span>
                 <span class="terminal-event-count" id="terminal-event-count">Event 0 / 0</span>
             </div>
             <div class="guided-scene-bar" id="guided-scene-bar" hidden>
                 <span class="guided-scene-number" id="guided-scene-number">Scene 1 / 6</span>
-                <strong class="guided-scene-title" id="guided-scene-title">Credential Attack</strong>
+                <strong class="guided-scene-title" id="guided-scene-title">Classes &amp; Objects</strong>
                 <span class="guided-scene-focus" id="guided-scene-focus"></span>
                 <span class="guided-scene-status" id="guided-scene-status">Press Play to begin.</span>
             </div>
@@ -83,7 +144,15 @@
                 </div>
             </div>
         </section>
+        </details>
 
+        <div class="simulation-heading">
+            <div>
+                <span class="learning-overline">LIVE OBJECT MAP</span>
+                <h3>Watch the classes interact</h3>
+            </div>
+            <p>Each class is a blueprint. Labels such as DEV001 and DEV002 represent separate instances with their own state. Select a method to view its Python source and run it in Manual mode.</p>
+        </div>
         <section class="cyber-space" id="cyber-space">
             <svg class="circuit-layer" id="circuit-layer"></svg>
 
@@ -105,6 +174,17 @@
                             <span class="class-type">CLASS</span>
                         </div>
                         <button class="method" id="attacker-perform" data-source="attacker-perform">perform_attack()</button>
+                    </div>
+
+                    <div class="class-card abstract-card" aria-label="Attack abstract base class">
+                        <div class="class-header">
+                            <div class="class-identity">
+                                <span class="class-name">Attack</span>
+                                <span class="abstract-caption">Shared interface · no direct instance</span>
+                            </div>
+                            <span class="class-type">ABSTRACT</span>
+                        </div>
+                        <div class="method-contract">execute(target) <span>required by subclasses</span></div>
                     </div>
 
                     <div class="class-card" id="credential-attack">
@@ -290,6 +370,7 @@
 <script src="js/source.js"></script>
 <script src="js/circuits.js"></script>
 <script src="js/playback.js"></script>
+<script src="js/learning.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

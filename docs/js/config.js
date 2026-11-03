@@ -24,46 +24,34 @@ const simulationModes = {
 
 const guidedScenes = [
     {
-        title: "Credential Attack",
-        action: "credential-execute",
-        request: { target: "DEV001" },
-        focus: "Object Interaction · Encapsulation",
-        intro: "Watch CredentialAttack call a NetworkDevice method instead of changing the device's private state directly."
+        concept: "classes", title: "Classes & Objects", action: "device-increase-risk",
+        request: { target: "DEV001" }, focus: "Classes · Instances · State",
+        intro: "DEV001 and DEV002 were created from the same NetworkDevice class. Watch only DEV001's state change."
     },
     {
-        title: "MITM Attack",
-        action: "mitm-execute",
-        request: { target: "CON001" },
-        focus: "Composition · Object Interaction",
-        intro: "Watch the Connection object update itself and interact with both devices that it contains."
+        concept: "encapsulation", title: "Encapsulation", action: "credential-execute",
+        request: { target: "DEV001" }, focus: "Methods · Controlled state updates",
+        intro: "CredentialAttack asks DEV001 to increase its own risk using a method, rather than changing its attribute directly."
     },
     {
-        title: "DoS Attack",
-        action: "dos-execute",
-        request: { target: "DEV001" },
-        focus: "Polymorphism · Multiple State Changes",
-        intro: "Watch one execute() method change both the device risk level and traffic level."
+        concept: "relationships", title: "Object Relationships", action: "mitm-execute",
+        request: { target: "CON001" }, focus: "References · Collaboration",
+        intro: "CON001 holds references to two NetworkDevice instances and calls a method on each."
     },
     {
-        title: "DDoS Attack",
-        action: "ddos-execute",
-        request: { target: "DEV001" },
-        focus: "Inheritance · Method Overriding · super()",
-        intro: "Watch DDoSAttack reuse DoSAttack through super(), then add stronger behaviour of its own."
+        concept: "inheritance", title: "Inheritance & super()", action: "ddos-execute",
+        request: { target: "DEV001" }, focus: "Inheritance · Overriding · super()",
+        intro: "DDoSAttack inherits from DoSAttack and calls its parent implementation before adding behaviour."
     },
     {
-        title: "Malware Attack",
-        action: "malware-execute",
-        request: { target: "DEV001" },
-        focus: "Polymorphism · Encapsulation",
-        intro: "Watch MalwareAttack use the same execute() interface while changing the device through its public method."
+        concept: "polymorphism", title: "Polymorphism", action: "attacker-perform",
+        request: { target: "DEV001", attack: "malware" }, focus: "Shared interface · Runtime dispatch",
+        intro: "Attacker.perform_attack() calls attack.execute(target). Here, attack refers to a MalwareAttack instance."
     },
     {
-        title: "Ransomware Attack",
-        action: "ransomware-execute",
-        request: { target: "DEV001" },
-        focus: "Inheritance · Method Extension · super()",
-        intro: "Watch RansomwareAttack reuse MalwareAttack, then extend it by increasing risk again and locking files."
+        concept: "abstraction", title: "Abstraction", action: "attacker-perform",
+        request: { target: "DEV001", attack: "credential" }, focus: "ABC · @abstractmethod · execute()",
+        intro: "The Attack abstract base class defines the execute() contract. CredentialAttack supplies its implementation."
     }
 ];
 
@@ -240,7 +228,7 @@ const terminalExplanations = {
     "attacker-perform": {
         code: "Finds the target ID, checks whether the target is blocked, then calls execute() on the selected attack object.",
         description: "Coordinates an attack against a simulated device or connection and stops the attack if the target is blocked.",
-        oopConcepts: "Composition · Polymorphism · Object Interaction"
+        oopConcepts: "Object References · Polymorphism · Object Interaction"
     },
     "credential-execute": {
         code: "Calls increase_risk(1) on the target device instead of changing the device's private risk value directly.",
@@ -250,7 +238,7 @@ const terminalExplanations = {
     "mitm-execute": {
         code: "Calls intercept() on the target Connection object. The Connection then handles its own state and connected devices.",
         description: "Simulates a man-in-the-middle attack intercepting communication between two devices.",
-        oopConcepts: "Composition · Object Interaction · Polymorphism"
+        oopConcepts: "Object References · Object Interaction · Polymorphism"
     },
     "dos-execute": {
         code: 'Calls increase_risk(1), then calls overload("HIGH") on the target device.',
@@ -310,7 +298,7 @@ const terminalExplanations = {
     "connection-intercept": {
         code: "Changes intercepted to True, then calls increase_risk(1) on both devices connected to this Connection.",
         description: "Simulates communication being intercepted between two connected devices.",
-        oopConcepts: "Composition · Object Interaction · Encapsulation"
+        oopConcepts: "Object References · Object Interaction · Encapsulation"
     },
     "connection-secure": {
         code: "Saves the old intercepted value, changes intercepted to False, then records the state change.",
@@ -355,6 +343,6 @@ const terminalExplanations = {
     "defender-secure": {
         code: "Calls secure() on the Connection so the Connection changes its own intercepted state.",
         description: "Secures a simulated connection that may have been intercepted.",
-        oopConcepts: "Composition · Encapsulation · Delegation"
+        oopConcepts: "Object References · Encapsulation · Delegation"
     }
 };

@@ -10,6 +10,7 @@ async function getSimulationState() {
             devices: data.devices || [],
             connections: data.connections || []
         };
+        updateLearningPlayback(0);
     }
     catch (error) {
         console.error("Unable to load simulation state:", error);
@@ -24,6 +25,7 @@ async function getSimulationState() {
 let executionEvents = [];
 let currentEventIndex = 0;
 let currentExecutionData = null;
+let executionInitialState = null;
 let currentRootButton = null;
 let playbackMethodStack = [];
 let playbackCallCounts = {};
@@ -98,6 +100,7 @@ function resetPlaybackPosition() {
 function clearPlaybackSession() {
     executionEvents = [];
     currentExecutionData = null;
+    executionInitialState = null;
     currentRootButton = null;
     isPlaying = false;
     isProcessingEvent = false;
@@ -173,6 +176,7 @@ function updateGuidedSceneDisplay(message = null) {
     if (title) title.textContent = scene?.title || "Guided Mode";
     if (focus) focus.textContent = scene ? `Focus: ${scene.focus}` : "";
     if (status && message !== null) status.textContent = message;
+    if (scene?.concept) selectLearningConcept(scene.concept, true);
 }
 
 function showGuidedReady(totalEvents = 0) {
@@ -736,6 +740,7 @@ async function playExecutionEvent(event, token) {
     const circuitType = findCircuitType(rootSourceId);
 
     renderTerminalEvent(event, currentEventIndex);
+    updateLearningPlayback(currentEventIndex + 1);
     highlightEventInstances(event);
 
     if (event.event_type === "METHOD_STARTED") {
@@ -812,6 +817,7 @@ async function rebuildPlaybackTo(targetIndex) {
     }
 
     renderTerminalAtPosition(safeTarget, true);
+    updateLearningPlayback(safeTarget);
 
     if (lastExecutedLine) {
         scrollToSourceLine(lastExecutedLine);
@@ -845,6 +851,7 @@ function finishPlayback() {
     }
 
     updatePlaybackControls();
+    updateLearningPlayback(currentEventIndex);
 }
 
 async function playNextEvent() {
@@ -977,6 +984,7 @@ function preparePlayback(rootButton, data) {
     resetPlaybackPosition();
     resetPlaybackVisuals();
     updatePlaybackControls();
+    updateLearningPlayback(0);
 }
 
 /* =========================
@@ -1000,6 +1008,7 @@ async function resetSimulation() {
         clearActiveVisuals();
         clearStateChanges();
         clearPlaybackSession();
+        updateLearningPlayback(0);
         window.setTimeout(redrawCircuitNetwork, 240);
 
         if (currentMode === simulationModes.GUIDED) {
@@ -1038,6 +1047,7 @@ async function executeMethod(button, requestData = {}, fromGuided = false) {
 
     try {
         setSystemStatus("Running Python");
+        executionInitialState = JSON.parse(JSON.stringify(simulationState));
         showTerminalLoading(button);
 
         const response = await fetch(`/api/execute/${encodeURIComponent(button.id)}`, {
