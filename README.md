@@ -12,69 +12,66 @@ An interactive Python OOP visualizer that uses scenario-based simulations to mak
 
 LOOP (Live Object-Oriented Playground) is an interactive Python OOP visualizer designed to make object-oriented programming easier to understand through visual execution.
 
-The current version uses a fictional cybersecurity scenario containing attackers, network devices, connections, and defenders. As Python methods execute, LOOP visualizes method calls, object interactions, state changes, inheritance, and the corresponding source code in real time.
+Learners read the real Python source of a scenario and click a method to run it. As the code executes, LOOP highlights each line, lights up the method calls between objects, shows how object state changes, and explains every step in plain language.
+
+Scenarios are example contexts for the same OOP ideas. The current version includes a fictional cybersecurity scenario, and new scenarios can be added without changing the playground.
 
 ## Goals
 
 - Make Python OOP concepts easier to understand visually
 - Clearly distinguish classes from object instances
 - Show method calls, object interactions, and state changes during execution
-- Demonstrate encapsulation, inheritance, composition, abstraction, and polymorphism
-- Keep Python as the source of truth for simulation state
+- Demonstrate encapsulation, inheritance, `super()`, polymorphism, abstraction, and object relationships
+- Keep Python as the source of truth: everything shown comes from real execution
 
 ## Features
 
-- Manual and Guided simulation modes
-- Real Python execution through FastAPI
-- Six fictional attack types
-- Defensive actions including block, isolate, restore, and secure
-- Real Python source-code display and highlighting
-- Object-instance indicators such as `DEV001`, `DEV002`, and `CON001`
-- Animated interaction paths
-- Real before-and-after state changes
-- Terminal execution history with OOP explanations
-- Visual inheritance and `super()` calls
-- Previous, Next, Play, Pause, Replay, and Reset controls
+- Real Python execution through FastAPI, traced line by line
+- The genuine Python source, fully visible inside the actor panels
+- Click a method in the code to run an action
+- Highlighting of the running line, and of methods waiting in the call stack
+- Animated circuit routes between methods, including `super()` calls
+- Status icons showing each object's state, kept between actions
+- A Terminal explaining each step: the story, the code, and the OOP concept
+- Play, Pause, Previous, Next, Replay, and Reset controls
+- Scenario tabs, with scenarios added as separate folders
 
-## OOP Concepts Demonstrated
+## Run Locally
 
-- **Encapsulation** - objects manage their own internal state through methods
-- **Composition** - the simulation contains attackers, defenders, devices, and connections
-- **Abstraction** - `Attack` defines a common `execute()` interface
-- **Polymorphism** - different attack classes implement the same `execute()` method
-- **Inheritance** - `DDoSAttack` extends `DoSAttack`, while `RansomwareAttack` extends `MalwareAttack`
-- **Method Overriding** - child classes provide their own implementation of `execute()`
-- **`super()`** - child classes reuse behaviour from their parent classes
+Requires Python 3.11 or newer.
+
+```bash
+python -m pip install -r requirements.txt
+python -m uvicorn api:app --reload
+```
+
+Open **http://127.0.0.1:8000**.
 
 ## Scope
 
 ### In Scope
 
-- Manual and Guided simulation modes
-- Six fictional attack types and defensive actions
-- Interactive Python source-code display
-- Object-instance and state-change visualization
-- Inheritance and `super()` visualization
-- Execution history and OOP explanations
+- Scenario-based OOP demonstrations using real Python execution
+- Line-by-line source highlighting and call visualization
+- Object state tracking and beginner-friendly explanations
+- Adding new scenarios without changing the playground
 
 ### Out of Scope
 
 - Real cybersecurity attacks or network access
-- Real malware, ransomware, phishing, or DoS activity
-- Password cracking or vulnerability scanning
-- Real firewall or antivirus integration
-- Full Python debugger or interpreter-level tracing
+- Real malware, ransomware, or interception
+- A general-purpose Python debugger, interpreter, or code editor
 
 ## Technology Stack
 
 | **Technology** | **Purpose** |
 | --- | --- |
-| Python | OOP classes, simulation logic, object state, and tracing |
+| Python | Educational OOP classes, execution tracing, and scenario management |
 | FastAPI | Backend API connecting Python to the browser |
-| JavaScript | User interaction, playback, and visualization |
+| JavaScript | Rendering, playback, circuits, and interaction |
 | HTML | Interface structure |
-| CSS | Layout, highlighting, animations, and effects |
+| CSS | Layout, highlighting, and animations |
 
 ## Documentation
 
-Full project report: `P03-LOOP.pdf`
+Original (V1): [P03-LOOP.pdf](P03-LOOP.pdf)
