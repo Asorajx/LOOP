@@ -1,0 +1,262 @@
+/* =========================
+   Theme
+   ========================= */
+
+/* Plain light/dark theme: white or near-black surfaces, one accent colour, and a colour per actor panel. */
+:root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --subtle: #f8fafc;
+    --hover: #f1f5f9;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --text: #111827;
+    --muted: #6b7280;
+    --faint: #9ca3af;
+
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-soft: #eef2ff;
+    --on-accent: #ffffff;
+
+    --panel-1: #e11d48;
+    --panel-1-soft: #fff1f2;
+    --panel-2: #0284c7;
+    --panel-2-soft: #f0f9ff;
+    --panel-3: #059669;
+    --panel-3-soft: #ecfdf5;
+
+    --inheritance: #7c3aed;
+    --inheritance-soft: #f5f3ff;
+    --property: #d97706;
+    --current-line: #fef9c3;
+    --current-bar: #eab308;
+
+    --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    --radius: 10px;
+}
+
+/* Dark mode only swaps these tokens. Components use the tokens, so they need no dark-mode rules of their own. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+        --bg: #0b0b0d;
+        --subtle: #131316;
+        --hover: #1b1b1f;
+        --border: #26262b;
+        --border-strong: #3a3a41;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --faint: #71717a;
+
+        --accent: #818cf8;
+        --accent-hover: #a5b4fc;
+        --accent-soft: rgba(129, 140, 248, 0.14);
+        --on-accent: #0b0b0d;
+
+        --panel-1: #fb7185;
+        --panel-1-soft: rgba(251, 113, 133, 0.12);
+        --panel-2: #38bdf8;
+        --panel-2-soft: rgba(56, 189, 248, 0.12);
+        --panel-3: #34d399;
+        --panel-3-soft: rgba(52, 211, 153, 0.12);
+
+        --inheritance: #a78bfa;
+        --inheritance-soft: rgba(167, 139, 250, 0.13);
+        --property: #fbbf24;
+        --current-line: rgba(234, 179, 8, 0.16);
+        --current-bar: #facc15;
+    }
+}
+
+
+/* =========================
+   Base Styles
+   ========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+}
+
+a {
+    color: var(--accent);
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    max-width: 1440px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 40px 32px;
+}
+
+
+/* =========================
+   Hero (placeholder)
+   ========================= */
+
+.hero {
+    display: grid;
+    gap: 14px;
+    max-width: 720px;
+    padding-top: 24px;
+}
+
+.brand {
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.hero h1 {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.hero p {
+    color: var(--muted);
+    font-size: 18px;
+}
+
+.hero-link {
+    width: fit-content;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+/* =========================
+   OOP Fundamentals (placeholder)
+   ========================= */
+
+.fundamentals h2,
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.fundamentals h2 {
+    margin-bottom: 20px;
+}
+
+.concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px 32px;
+}
+
+.concept-card {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+}
+
+.concept-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.concept-card p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.concept-card a {
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+
+/* =========================
+   Playground and Scenario Tabs
+   ========================= */
+
+.playground {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    scroll-margin-top: 16px;
+}
+
+.scenario-tabs {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-shadow: inset 0 -1px 0 var(--border);
+}
+
+.scenario-tab {
+    flex: 0 0 auto;
+    padding: 10px 2px;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.scenario-tab:hover {
+    color: var(--text);
+}
+
+.scenario-tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 12px;
+}
+
+footer {
+    color: var(--faint);
+    font-size: 13px;
+}
+
+@media (max-width: 900px) {
+    .page {
+        gap: 36px;
+        padding: 24px 16px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+}
