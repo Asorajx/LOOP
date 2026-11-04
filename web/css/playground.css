@@ -59,8 +59,37 @@
     font-variant-numeric: tabular-nums;
 }
 
-.text-button {
+/* Display settings, stacked at the end of the row. */
+.display-options {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     margin-left: auto;
+}
+
+.auto-scroll-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.auto-scroll-option:hover {
+    color: var(--text);
+}
+
+.auto-scroll-option input {
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.text-button {
     padding: 0;
     color: var(--muted);
     background: none;
@@ -260,6 +289,11 @@ body:not(.show-line-numbers) .line-ref {
     border-radius: var(--radius);
 }
 
+/* Fixed height during a run, so new cards never push the actor panels down. */
+.terminal-log.has-run {
+    height: 360px;
+}
+
 .terminal-empty {
     display: grid;
     gap: 2px;
@@ -422,8 +456,154 @@ body:not(.show-line-numbers) .line-ref {
 }
 
 
+/* =========================
+   Compact Terminal
+   ========================= */
+
+.terminal-dock {
+    position: fixed;
+    z-index: 25;
+    top: 0;
+    left: 50%;
+    display: grid;
+    gap: 4px;
+    width: min(1376px, calc(100vw - 32px));
+    padding: 8px 14px 10px;
+    background: var(--dock-bg);
+    border: 1px solid var(--dock-border);
+    border-top: 0;
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 20px -6px var(--dock-shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+/* Compact Terminal surface: one step off the workspace, with a soft downward shadow. */
+.terminal-dock {
+    --dock-bg: #f4f5f8;
+    --dock-border: #d6d9e0;
+    --dock-shadow: rgba(15, 23, 42, 0.16);
+}
+
+:root[data-theme="dark"] .terminal-dock {
+    --dock-bg: #18181d;
+    --dock-border: #2e2e35;
+    --dock-shadow: rgba(0, 0, 0, 0.55);
+}
+
+.terminal-dock.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+.terminal-dock-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.terminal-dock-progress {
+    color: var(--muted);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.terminal-dock-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dock-button {
+    min-width: 26px;
+    height: 24px;
+    padding: 0 8px;
+    color: var(--text);
+    background: var(--workspace);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.dock-button:hover:not(:disabled) {
+    background: var(--hover);
+}
+
+.dock-button:disabled {
+    color: var(--faint);
+    opacity: var(--disabled-opacity);
+    cursor: default;
+}
+
+.dock-link {
+    margin-left: 8px;
+    padding: 0;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.dock-link:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+.dock-link[hidden] {
+    display: none;
+}
+
+.terminal-dock-story {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    color: var(--text);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.terminal-dock-code {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.terminal-dock-code code {
+    color: var(--text);
+    font-family: var(--mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .terminal-dock {
+        transition: none;
+    }
+}
+
 @media (max-width: 900px) {
-    .text-button {
+    .display-options {
+        align-items: flex-start;
         margin-left: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .terminal-dock {
+        padding: 7px 10px 8px;
+    }
+
+    .dock-link {
+        margin-left: 4px;
     }
 }

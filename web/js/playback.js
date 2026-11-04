@@ -40,6 +40,7 @@ function loadRun(run, target) {
 
 function clearRun() {
     stopPlayback();
+    cancelPageScroll();
     playback.run = null;
     playback.position = -1;
     renderTerminal(null);
@@ -127,9 +128,11 @@ function atEnd() {
 function playPlayback() {
     if (!playback.run || atEnd()) return;
     stopPlayback();
+    resumeFollowing();
 
     const tick = function() {
         showPosition(playback.position + 1);
+        followStep(playback.run.steps[playback.position]);
         playback.timer = atEnd() ? null : window.setTimeout(tick, PLAYBACK_DELAY);
         updatePlaybackControls();
     };
@@ -145,12 +148,16 @@ function stopPlayback() {
 
 function previousStep() {
     stopPlayback();
+    resumeFollowing();
     showPosition(playback.position - 1);
+    followStep(playback.run?.steps[playback.position]);
 }
 
 function nextStep() {
     stopPlayback();
+    resumeFollowing();
     showPosition(playback.position + 1);
+    followStep(playback.run?.steps[playback.position]);
 }
 
 /* Replay shows the recorded steps again. It never runs the Python a second time. */
@@ -176,6 +183,7 @@ function updatePlaybackControls() {
 
     /* Method previews pause while playback plays, and return when it's paused or finished. */
     setPreviewAllowed(!playing);
+    updateDock();
 }
 
 

@@ -14,6 +14,7 @@ function renderTerminal(run, position, onSelect) {
     const log = document.getElementById("terminal-log");
     document.getElementById("terminal-call").textContent = run ? run.call : "";
     log.innerHTML = "";
+    log.classList.toggle("has-run", Boolean(run));
 
     if (!run) {
         const empty = makeElement("div", "terminal-empty");

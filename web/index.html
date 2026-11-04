@@ -152,7 +152,13 @@
             <button class="playback-button" id="playback-reset" type="button"
                     title="Recreate every object with its starting values.">Reset</button>
             <span class="playback-progress" id="playback-progress">Step 0 / 0</span>
-            <button class="text-button" id="toggle-lines" type="button" aria-pressed="false">Show line numbers</button>
+            <div class="display-options">
+                <button class="text-button" id="toggle-lines" type="button" aria-pressed="false">Show line numbers</button>
+                <label class="auto-scroll-option">
+                    <input id="toggle-auto-scroll" type="checkbox" checked>
+                    <span>Auto-scroll</span>
+                </label>
+            </div>
         </section>
 
         <section class="terminal" aria-labelledby="terminal-title">
@@ -183,6 +189,22 @@
             <div class="terminal-log" id="terminal-log" role="log" aria-live="polite"></div>
         </section>
 
+        <!-- Compact Terminal: shown while the Terminal is scrolled out of view during a run. -->
+        <aside class="terminal-dock" id="terminal-dock" aria-label="Current step" hidden>
+            <div class="terminal-dock-head">
+                <span class="terminal-dock-progress" id="dock-progress"></span>
+                <div class="terminal-dock-actions">
+                    <button class="dock-button" id="dock-previous" type="button" aria-label="Previous step">&lsaquo;</button>
+                    <button class="dock-button" id="dock-play" type="button">Pause</button>
+                    <button class="dock-button" id="dock-next" type="button" aria-label="Next step">&rsaquo;</button>
+                    <button class="dock-link" id="dock-follow" type="button" hidden>Follow</button>
+                    <button class="dock-link" id="dock-terminal" type="button">Terminal &uarr;</button>
+                </div>
+            </div>
+            <p class="terminal-dock-story" id="dock-story"></p>
+            <p class="terminal-dock-code"><code id="dock-code"></code> <span id="dock-detail"></span></p>
+        </aside>
+
         <!-- Circuit layer and target picker overlay the panels. -->
         <section class="actor-space" id="actor-space" aria-label="Actor panels">
             <svg class="circuit-layer" id="circuit-layer" aria-hidden="true"></svg>
@@ -208,6 +230,7 @@
 <script src="js/hero.js"></script>
 <script src="js/terminal.js"></script>
 <script src="js/playback.js"></script>
+<script src="js/follow.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

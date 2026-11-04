@@ -146,6 +146,7 @@ async function runAction(action, target) {
         loop.state = run.after;
         addRoutesFromRun(run);
         loadRun(run, target);
+        startFollowing(run);
         playPlayback();
         setStatus("");
     }
