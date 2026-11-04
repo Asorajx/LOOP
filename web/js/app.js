@@ -27,17 +27,25 @@ function setStatus(text) {
    ========================= */
 
 /* Tabs are generated from the scenarios the server finds, so a new scenario folder adds a tab. */
+/* Each tab carries a hidden copy of its title that the CSS glitch slices on hover or focus. */
+/* Clicking the tab that is already selected does nothing, so it never reloads the same scenario. */
 async function loadScenarioTabs() {
     const scenarios = await requestJson("/api/scenarios");
     const tabs = document.getElementById("scenario-tabs");
     tabs.innerHTML = "";
 
     scenarios.forEach(function(scenario) {
-        const tab = makeElement("button", "scenario-tab", scenario.title);
+        const tab = makeElement("button", "scenario-tab");
+        const glitch = makeElement("span", "scenario-tab-glitch", scenario.title);
+        glitch.setAttribute("aria-hidden", "true");
+        tab.append(makeElement("span", "scenario-tab-label", scenario.title), glitch);
         tab.type = "button";
         tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-label", scenario.title);
         tab.dataset.scenario = scenario.id;
-        tab.addEventListener("click", () => selectScenario(scenario.id));
+        tab.addEventListener("click", function() {
+            if (scenario.id !== loop.scenarioId) selectScenario(scenario.id);
+        });
         tabs.appendChild(tab);
     });
 

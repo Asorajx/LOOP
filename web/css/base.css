@@ -8,6 +8,9 @@
     color-scheme: light;
     --bg: #ffffff;
     --subtle: #f8fafc;
+    /* Section surfaces: hero a faint cool tint, fundamentals a step deeper, the Playground on --bg. */
+    --surface-hero: #f8f9fc;
+    --surface-section: #f2f3f7;
     --hover: #f1f5f9;
     --border: #e5e7eb;
     --border-strong: #d1d5db;
@@ -51,6 +54,8 @@
     color-scheme: dark;
     --bg: #0b0b0d;
     --subtle: #131316;
+    --surface-hero: #0e1015;
+    --surface-section: #17171b;
     --hover: #1b1b1f;
     --border: #26262b;
     --border-strong: #3a3a41;
@@ -246,10 +251,12 @@ a {
     }
 }
 
+/* --section-gap is shared with the hero band, which paints through the gap down to the fundamentals. */
 .page {
+    --section-gap: 48px;
     display: flex;
     flex-direction: column;
-    gap: 48px;
+    gap: var(--section-gap);
     max-width: 1440px;
     min-height: 100vh;
     margin: 0 auto;
@@ -260,6 +267,16 @@ a {
 /* =========================
    OOP Fundamentals (placeholder)
    ========================= */
+
+/* A full-width band one step lighter than the page (darker in light mode), so the reference material reads as its */
+/* own part of the page between the hero and the Playground, with no divider lines. The spread shadow paints */
+/* the tint edge to edge without changing the layout; clip-path trims it to the section's height. */
+.fundamentals {
+    padding-block: 48px;
+    background: var(--surface-section);
+    box-shadow: 0 0 0 100vmax var(--surface-section);
+    clip-path: inset(0 -100vmax);
+}
 
 .fundamentals h2,
 .section-title {
@@ -315,33 +332,135 @@ a {
     scroll-margin-top: 16px;
 }
 
+/* Scenario tabs: angular, layered buttons with a little cyber character, as a contrast to the calm page. */
+/* Inspired by a Uiverse.io design by rubyreapergaming (MIT License): its silhouette, offset layer, */
+/* red/navy contrast and sliced-text glitch, reworked here (pixel corners, LOOP's font, a one-shot glitch). */
+/* The padding leaves room for the offset layer and glitch, so the scroll box never clips them. */
+/* Trial: no divider line below the tabs (it was box-shadow: inset 0 -1px 0 var(--border), with 14px bottom padding). */
 .scenario-tabs {
     display: flex;
-    gap: 24px;
+    gap: 14px;
+    padding: 4px 8px 6px 0;
     overflow-x: auto;
     overflow-y: hidden;
-    box-shadow: inset 0 -1px 0 var(--border);
 }
 
+/* Unselected: red plate on a dark-red layer. Selected: navy plate on an outline layer that rests softened */
+/* (grey in dark mode, pale indigo in light mode) and brightens with the glitch on hover or focus. */
+/* Pixel corners keep every tab's bevels the same whatever the title's length. */
+/* The button is 32px tall like the playback buttons (a comfortable target); the plate is inset to 26px. */
 .scenario-tab {
+    --plate: #d6303c;
+    --plate-hover: #b82533;
+    --layer: #631e29;
+    --shift: 2px;
+    --clip: polygon(7px 0, calc(100% - 4px) 0, 100% 6px, 100% calc(100% - 4px),
+        calc(100% - 5px) calc(100% - 4px), calc(100% - 5px) 100%, 6px 100%, 0 calc(100% - 6px));
+    --pad: 0 18px 0 14px;
+    position: relative;
+    z-index: 0;
     flex: 0 0 auto;
-    padding: 10px 2px;
-    color: var(--muted);
+    height: 32px;
+    padding: var(--pad);
+    color: #ffffff;
     background: none;
     border: 0;
-    border-bottom: 2px solid transparent;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     cursor: pointer;
 }
 
-.scenario-tab:hover {
-    color: var(--text);
+.scenario-tab.active {
+    --plate: #161a25;
+    --plate-hover: #1f2535;
+    --layer: color-mix(in srgb, var(--accent) 50%, var(--bg));
+    --layer-lit: var(--accent);
+    cursor: default;
 }
 
-.scenario-tab.active {
-    color: var(--text);
-    border-bottom-color: var(--accent);
+[data-theme="dark"] .scenario-tab.active {
+    --layer: #71717a;
+    --layer-lit: #f4f4f5;
+}
+
+.scenario-tab.active:is(:hover, :focus-visible) {
+    --layer: var(--layer-lit);
+}
+
+/* ::before is the offset layer, ::after the plate; both share the clipped silhouette. */
+/* The layer sits 2px right and down: the theme button's raised offset, a step quieter. */
+.scenario-tab::before,
+.scenario-tab::after {
+    position: absolute;
+    inset: 3px 0;
+    z-index: -1;
+    clip-path: var(--clip);
+    content: "";
+}
+
+.scenario-tab::before {
+    background: var(--layer);
+    transform: translate(var(--shift), var(--shift));
+    transition: background-color 0.15s ease;
+}
+
+.scenario-tab::after {
+    background: var(--plate);
+    transition: background-color 0.15s ease;
+}
+
+.scenario-tab:hover::after {
+    background: var(--plate-hover);
+}
+
+.scenario-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+/* The glitch: a copy of the title on the plate's colour, with a red/cyan split, shown only while */
+/* the slices run. On hover or keyboard focus it jumps through a few horizontal slices once (450ms) */
+/* and ends fully clipped away. Nothing runs at rest. */
+.scenario-tab-glitch {
+    position: absolute;
+    inset: 3px 0;
+    display: none;
+    place-items: center;
+    padding: var(--pad);
+    background: var(--plate);
+    text-shadow: -2px 0 rgba(255, 70, 100, 0.85), 2px 0 rgba(70, 225, 255, 0.85);
+    clip-path: inset(50% 0 50% 0);
+    pointer-events: none;
+}
+
+.scenario-tab:hover .scenario-tab-glitch,
+.scenario-tab:focus-visible .scenario-tab-glitch {
+    display: grid;
+    animation: scenario-glitch 450ms steps(1, end) 1;
+}
+
+@keyframes scenario-glitch {
+    0%   { clip-path: inset(8% 0 70% 0);  transform: translateX(-3px); }
+    14%  { clip-path: inset(62% 0 14% 0); transform: translateX(3px); }
+    28%  { clip-path: inset(34% 0 44% 0); transform: translateX(-2px); }
+    42%  { clip-path: inset(78% 0 4% 0);  transform: translateX(2px); }
+    56%  { clip-path: inset(0 0 84% 0);   transform: translateX(-1px); }
+    70%  { clip-path: inset(44% 0 30% 0); transform: translateX(1px); }
+    100% { clip-path: inset(50% 0 50% 0); transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scenario-tab::before,
+    .scenario-tab::after {
+        transition: none;
+    }
+
+    .scenario-tab:hover .scenario-tab-glitch,
+    .scenario-tab:focus-visible .scenario-tab-glitch {
+        display: none;
+    }
 }
 
 .section-header {
@@ -360,7 +479,7 @@ footer {
 
 @media (max-width: 900px) {
     .page {
-        gap: 36px;
+        --section-gap: 36px;
         padding: 24px 16px;
     }
 }

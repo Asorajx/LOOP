@@ -5,6 +5,8 @@
 /* Copy on the left, a small object diagram on the right. Borderless, like the sections below. */
 /* The diagram takes only the width it needs; the copy leads and takes the rest. */
 /* The arrow has its own row, so the copy and the diagram centre on each other. */
+/* A faint full-width band: the spread shadow reaches the top of the page and down through the */
+/* section gap, so it meets the fundamentals band with no strip of page colour between them. */
 .hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -15,6 +17,9 @@
     align-items: center;
     column-gap: 72px;
     padding-bottom: 16px;
+    background: var(--surface-hero);
+    box-shadow: 0 0 0 100vmax var(--surface-hero);
+    clip-path: inset(-100vmax -100vmax calc(var(--section-gap) * -1));
 }
 
 /* LOOP on the left, the theme switch on the right. */
