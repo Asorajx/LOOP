@@ -2,8 +2,7 @@
    App State and Helpers
    ========================= */
 
-/* Loads scenarios from the API and starts actions from the code itself. */
-/* Clicking an actionable def line asks for a target (when there's a choice) and runs it. */
+/* Load scenarios and run an action when its def line is clicked. */
 const loop = {
     scenarioId: null,
     data: null,
@@ -26,9 +25,7 @@ function setStatus(text) {
    Scenario Tabs
    ========================= */
 
-/* Tabs are generated from the scenarios the server finds, so a new scenario folder adds a tab. */
-/* Each tab has a dot in its scenario's colour, and a hidden copy of its title that the CSS glitch */
-/* slices on hover or focus. Clicking the tab that is already selected does nothing. */
+/* One tab per scenario: a colour dot, the title, and a hidden copy for the glitch effect. */
 async function loadScenarioTabs() {
     const scenarios = await requestJson("/api/scenarios");
     const tabs = document.getElementById("scenario-tabs");
@@ -64,8 +61,7 @@ async function selectScenario(scenarioId) {
     const data = await requestJson(`/api/scenarios/${encodeURIComponent(scenarioId)}`);
     loop.scenarioId = scenarioId;
     loop.data = data;
-    /* Lets panels.css give this scenario's actor panels their own colours. It's set on the panels, */
-    /* not the whole Playground, so the tabs keep their own scenario's colours. */
+    /* Selects this scenario's panel colours in panels.css. */
     document.getElementById("actor-space").dataset.scenario = scenarioId;
     loop.state = data.state;
 
@@ -181,9 +177,7 @@ async function resetScenario() {
    Theme Switch
    ========================= */
 
-/* The <head> script has already set data-theme before the page was drawn. */
-/* This keeps the switch in step with it, saves the visitor's choice, and */
-/* follows the system setting until the visitor picks a theme themselves. */
+/* Sync the switch with data-theme, save the choice, and follow the system until one is saved. */
 const THEME_KEY = "loop-theme";
 const themeToggle = document.getElementById("theme-toggle");
 const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
@@ -234,6 +228,32 @@ document.getElementById("toggle-lines").addEventListener("click", function() {
     this.setAttribute("aria-pressed", String(show));
     this.textContent = show ? "Hide line numbers" : "Show line numbers";
 });
+
+/* Legend: click toggles it open; a press outside or Escape closes it. */
+const circuitHelp = document.getElementById("circuit-help");
+const circuitHelpToggle = document.getElementById("circuit-help-toggle");
+
+function closeCircuitHelp() {
+    circuitHelp.classList.remove("is-open");
+    circuitHelpToggle.setAttribute("aria-expanded", "false");
+}
+
+circuitHelpToggle.addEventListener("click", function(event) {
+    circuitHelp.classList.remove("is-dismissed");
+    const open = circuitHelp.classList.toggle("is-open");
+    this.setAttribute("aria-expanded", String(open));
+    if (!open && event.detail > 0) this.blur();
+});
+document.addEventListener("pointerdown", function(event) {
+    if (!circuitHelp.contains(event.target)) closeCircuitHelp();
+});
+document.addEventListener("keydown", function(event) {
+    if (event.key !== "Escape" || !circuitHelp.contains(document.activeElement)) return;
+    closeCircuitHelp();
+    circuitHelp.classList.add("is-dismissed");
+});
+circuitHelp.addEventListener("pointerleave", () => circuitHelp.classList.remove("is-dismissed"));
+circuitHelp.addEventListener("focusout", () => circuitHelp.classList.remove("is-dismissed"));
 
 themeToggle.addEventListener("change", chooseTheme);
 systemDark.addEventListener("change", event => { if (!savedTheme()) applyTheme(event.matches ? "dark" : "light"); });

@@ -9,9 +9,7 @@ function setTerminalHint(action) {
     terminalHint = action ? action.method.split(".") : null;
 }
 
-/* One card per traced step. The current card separates three things: */
-/* Story (what happened), Code (how the highlighted line caused it) and Concept (the OOP idea). */
-/* Earlier cards shrink to one line, and a summary card closes the action. */
+/* One card per step: Story, Code and Concept. Earlier cards collapse; a summary card ends the action. */
 function renderTerminal(run, position, onSelect) {
     const log = document.getElementById("terminal-log");
     document.getElementById("terminal-call").textContent = run ? run.call : "";

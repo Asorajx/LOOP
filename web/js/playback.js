@@ -2,7 +2,9 @@
    Playback State
    ========================= */
 
-const PLAYBACK_DELAY = 1200;
+/* Milliseconds between steps. The travelling light lasts slightly less than one step. */
+const PLAYBACK_DELAY = 1400;
+document.documentElement.style.setProperty("--circuit-travel", `${(PLAYBACK_DELAY - 100) / 1000}s`);
 
 const playback = {
     run: null,
@@ -11,8 +13,7 @@ const playback = {
     timer: null
 };
 
-/* Work out the call stack, with each frame's current line, for every step. */
-/* Doing this once up front lets any step be shown directly, forwards or backwards. */
+/* Record the call stack and each frame's current line at every step. */
 function analyseRun(run) {
     const frames = [];
 
@@ -42,7 +43,7 @@ function clearRun() {
     playback.run = null;
     playback.position = -1;
     renderTerminal(null);
-    highlightMethods();
+    highlightCallStack();
     highlightObjects();
     highlightCode();
     drawRoutes(null);
@@ -63,9 +64,7 @@ function stateAt(run, position) {
    Showing a Step
    ========================= */
 
-/* showPosition() is the single place that draws a step. */
-/* The status icons, Terminal, highlighted code, methods and circuit all update from it together, */
-/* so they can never fall out of sync, whether playing, stepping or jumping from the Terminal. */
+/* Draw one step: status icons, Terminal, code highlighting and circuit. */
 function showPosition(position) {
     const run = playback.run;
     if (!run) return;
@@ -77,7 +76,7 @@ function showPosition(position) {
     renderTerminal(run, playback.position, selectPosition);
 
     if (!step) {
-        highlightMethods();
+        highlightCallStack();
         highlightObjects(null, playback.target);
         highlightCode();
         drawRoutes(null);
@@ -88,16 +87,9 @@ function showPosition(position) {
     const frames = step.frames;
     const top = frames[frames.length - 1];
     const below = frames.slice(0, -1);
-    const done = new Set();
-    for (let index = 0; index <= playback.position; index += 1) {
-        run.steps[index].frames.forEach(frame => done.add(frame.method));
-    }
 
-    highlightMethods({
-        running: top.method,
-        waiting: below.map(frame => frame.method),
-        done: Array.from(done)
-    });
+    /* Focus on the entire active stack while steps remain, not just the yellow line. */
+    highlightCallStack(playback.position < run.steps.length - 1 ? frames.map(frame => frame.method) : []);
     highlightObjects(step.object, playback.target);
 
     /* Light the route that led into the running method; the very first call has none. */
@@ -181,6 +173,9 @@ function updatePlaybackControls() {
     document.getElementById("playback-replay").disabled = !hasRun;
     document.getElementById("playback-progress").textContent =
         `Step ${hasRun ? playback.position + 1 : 0} / ${total}`;
+
+    /* Method previews pause while playback plays, and return when it's paused or finished. */
+    setPreviewAllowed(!playing);
 }
 
 

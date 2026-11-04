@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Pick the theme before anything is drawn, so the page never flashes the wrong one: -->
-    <!-- the saved choice, or else the system setting. app.js keeps the switch in step with it. -->
+    <!-- Set the saved or system theme before the page draws. -->
     <script>
         (function() {
             let theme = null;
@@ -31,8 +30,7 @@
     <link rel="stylesheet" href="css/panels.css">
     <link rel="stylesheet" href="css/playground.css">
 
-    <!-- Hide the headline until hero.js starts typing it, and the description and diagram until they play,
-         so nothing flashes in full first. The timeout shows them anyway if the scripts never arrive. -->
+    <!-- Hide hero text and diagram until hero.js animates them; show them after 3s regardless. -->
     <script>
         if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             document.documentElement.classList.add("typewriter-pending", "hero-motion");
@@ -54,8 +52,7 @@
         <div class="hero-bar">
             <span class="brand">LOOP</span>
             <!-- Theme button adapted from Uiverse.io by andrew-demchenk0 (MIT License). -->
-            <!-- Checked means dark. The sun shows in dark mode (press for light), the moon in light mode. -->
-            <!-- Which icon shows follows data-theme, so it is right from the first frame. -->
+            <!-- Checked means dark. The icon shown follows data-theme. -->
             <label class="theme-button" title="Switch to dark mode">
                 <input class="theme-button-input" type="checkbox" id="theme-toggle" role="switch" aria-label="Dark mode">
                 <svg class="theme-button-icon theme-button-sun" viewBox="0 0 24 24" aria-hidden="true">
@@ -72,15 +69,12 @@
             <p class="hero-description">LOOP runs real Python object-oriented code and shows you what each line does: which object runs, which method it calls, and what changes.</p>
         </div>
 
-        <!-- Its own row under the copy, so the headline and diagram centre on each other. -->
-        <!-- Same path as the arrowDown icon in icons.js, written inline so it shows before the scripts run. -->
+        <!-- Inline copy of the arrowDown icon from icons.js. -->
         <a class="hero-scroll" href="#playground" aria-label="Jump to the Playground" title="Jump to the Playground">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
         </a>
 
-        <!-- A small picture of the Cybersecurity scenario: the objects, methods and calls match scenarios/cybersecurity. -->
-        <!-- hero.js draws the routes between the methods and plays the two calls once, when the diagram comes into view. -->
-        <!-- Rows sit on a shared grid: both calls start on the same row, so the routes read as a pair. -->
+        <!-- Cybersecurity diagram; hero.js draws its routes and plays the two calls. -->
         <figure class="hero-diagram" id="hero-diagram" role="img"
                 aria-label="attacker.launch(malware, device_a) calls malware.execute, which calls device_a.infect, so infected changes from False to True. Then victim.isolate(device_a) calls device_a.disconnect, so online changes from True to False.">
             <svg class="hero-lines" id="hero-lines" aria-hidden="true"></svg>
@@ -141,7 +135,7 @@
 
     <!-- Scenario tabs, actor panels and Terminal cards are filled in by the scripts below. -->
     <main class="playground" id="playground">
-        <!-- The tab strip ends the fundamentals band; the active tab opens into the Playground below. -->
+        <!-- Scenario tabs; the active one joins the Playground below. -->
         <div class="scenario-bar">
             <nav class="scenario-tabs" id="scenario-tabs" role="tablist" aria-label="Scenarios"></nav>
         </div>
@@ -164,12 +158,32 @@
         <section class="terminal" aria-labelledby="terminal-title">
             <div class="section-header">
                 <h2 class="section-title" id="terminal-title">Terminal</h2>
+                <div class="circuit-help" id="circuit-help">
+                    <button class="circuit-help-button" id="circuit-help-toggle" type="button"
+                            aria-label="Legend: circuits and code highlighting" aria-describedby="circuit-legend"
+                            aria-expanded="false" aria-controls="circuit-legend">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5h.01"/></svg>
+                    </button>
+                    <div class="circuit-legend" id="circuit-legend">
+                        <strong>Circuits</strong>
+                        <div class="circuit-legend-row"><span class="legend-line net-call" aria-hidden="true"></span><span>Method call</span></div>
+                        <div class="circuit-legend-row"><span class="legend-line net-super" aria-hidden="true"></span><span><code>super()</code> call</span></div>
+                        <div class="circuit-legend-row"><span class="legend-line net-property" aria-hidden="true"></span><span>Property access</span></div>
+                        <div class="circuit-legend-row"><span class="legend-line net-call is-light" aria-hidden="true"></span><span>Travelling light: running</span></div>
+                        <div class="circuit-legend-row"><span class="legend-line net-call is-glow" aria-hidden="true"></span><span>Still glow: hover preview</span></div>
+                        <strong>Code</strong>
+                        <div class="circuit-legend-row"><span class="legend-code is-executing" aria-hidden="true"></span><span>Executing</span></div>
+                        <div class="circuit-legend-row"><span class="legend-code is-waiting" aria-hidden="true"></span><span>Waiting caller</span></div>
+                        <div class="circuit-legend-row"><span class="legend-code is-executed" aria-hidden="true"></span><span>Executed</span></div>
+                        <div class="circuit-legend-row"><span class="legend-code is-dimmed" aria-hidden="true">def</span><span>Unrelated code</span></div>
+                    </div>
+                </div>
                 <code class="terminal-call" id="terminal-call"></code>
             </div>
             <div class="terminal-log" id="terminal-log" role="log" aria-live="polite"></div>
         </section>
 
-        <!-- The circuit layer and target picker float over the panels, so they never move the code. -->
+        <!-- Circuit layer and target picker overlay the panels. -->
         <section class="actor-space" id="actor-space" aria-label="Actor panels">
             <svg class="circuit-layer" id="circuit-layer" aria-hidden="true"></svg>
             <div class="target-picker" id="target-picker" role="dialog" aria-label="Choose a target" hidden></div>
@@ -186,7 +200,7 @@
      Scripts
      ========================= -->
 
-<!-- The scripts share functions, so order matters: data and helpers first, app.js last because it starts the page. -->
+<!-- Order matters: helpers first, app.js last. -->
 <script src="js/concepts.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/panels.js"></script>

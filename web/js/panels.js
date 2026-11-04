@@ -24,8 +24,7 @@ function formatValue(value) {
    Actor Panels
    ========================= */
 
-/* Each class is shown as one continuous block of its real source, exactly as it appears in the file. */
-/* Object labels and status icons sit above the block, never inside the code. */
+/* Render each class's source, with object labels and status icons above it. */
 function renderPanels(data, onAction) {
     const space = document.getElementById("actor-space");
     space.querySelectorAll(".space").forEach(panel => panel.remove());
@@ -75,6 +74,9 @@ function renderClass(cls, data, actions, onAction) {
     for (let number = cls.start; number <= cls.end; number += 1) {
         const method = defLines[number];
         const line = createSourceLine(cls.file, number, lines[number - 1], method);
+        /* The method this line belongs to, used by highlightCallStack. */
+        const owner = cls.methods.find(item => number >= item.start && number <= item.end);
+        if (owner) line.dataset.ownerMethod = owner.id;
         if (method && actions[method.id]) makeActionable(line, actions[method.id], onAction);
         code.appendChild(line);
     }
@@ -156,8 +158,7 @@ function updateObjectStates(state, data, changed = []) {
     });
 }
 
-/* Unusual states are filled and coloured; normal ones are faint. */
-/* The label floats above the icon on hover, keyboard focus or tap, so nothing moves. */
+/* Icon for one attribute: coloured when not normal, labelled on hover, focus or tap. */
 function createStatusIcon(label, attribute, value, settings, changed) {
     const key = `${label}.${attribute}`;
     const active = value !== settings.normal;
@@ -171,8 +172,7 @@ function createStatusIcon(label, attribute, value, settings, changed) {
     status.classList.toggle("revealed", tappedStatus.has(key));
     status.append(createIcon(settings.icon), makeElement("span", "status-label", text));
 
-    /* Only a touch tap pins the label, because touch screens have no hover. */
-    /* A mouse click leaves nothing behind: the label just follows the pointer. */
+    /* A touch tap toggles the label; blur hides it. */
     status.addEventListener("pointerup", function(event) {
         if (event.pointerType !== "touch") return;
         tappedStatus.has(key) ? tappedStatus.delete(key) : tappedStatus.add(key);
@@ -187,20 +187,8 @@ function createStatusIcon(label, attribute, value, settings, changed) {
 
 
 /* =========================
-   Method, Code and Object Highlighting
+   Code and Object Highlighting
    ========================= */
-
-/* running: the method whose line is executing now. */
-/* waiting: methods further down the call stack, paused at a call. */
-/* done: methods that already returned during this action. */
-function highlightMethods({ running = null, waiting = [], done = [] } = {}) {
-    document.querySelectorAll(".def-line").forEach(function(line) {
-        const id = line.dataset.method;
-        line.classList.toggle("running", id === running);
-        line.classList.toggle("waiting", id !== running && waiting.includes(id));
-        line.classList.toggle("done", id !== running && !waiting.includes(id) && done.includes(id));
-    });
-}
 
 /* Lines are matched by their real file and line number, never by searching for text. */
 function highlightCode({ current = null, waiting = [], executed = [] } = {}) {
@@ -214,6 +202,16 @@ function highlightCode({ current = null, waiting = [], executed = [] } = {}) {
     executed.forEach(key => mark(key, "executed"));
     waiting.forEach(key => mark(key, "waiting-line"));
     if (current) mark(current, "executing");
+}
+
+/* Mark lines in the call stack; with no methods, nothing is dimmed. */
+function highlightCallStack(methods = []) {
+    const space = document.getElementById("actor-space");
+    const active = new Set(methods);
+    space.classList.toggle("has-execution-focus", active.size > 0);
+    space.querySelectorAll(".source-line").forEach(line => {
+        line.classList.toggle("in-call-stack", active.has(line.dataset.ownerMethod));
+    });
 }
 
 function highlightObjects(activeObject = null, targetObject = null) {

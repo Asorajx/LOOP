@@ -1,14 +1,11 @@
-/* The hero intro: the headline types itself out and the description fades up after it, */
-/* while the object diagram plays two calls once. */
-/* Both run on their own and need nothing from the Playground except svgElement() from routes.js. */
+/* Hero: type the headline, fade in the description, and play the diagram once. */
 
 
 /* =========================
    Hero Typewriter
    ========================= */
 
-/* Only the short headline is typed. The longer description fades up as a whole once the headline is done, */
-/* so the page never sits half-written. The fade itself is CSS (.hero-description in hero.css). */
+/* Type the headline, then fade in the description (hero.css). */
 const typewriterHeading = document.querySelector('[data-typewriter="heading"]');
 const heroDescription = document.querySelector(".hero-description");
 const typewriterReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -95,9 +92,8 @@ startHeroTypewriter();
    Hero Diagram
    ========================= */
 
-/* A fixed picture of two Cybersecurity actions, so it shows even while the server wakes up. */
-/* The routes match the calls the real code makes (launch -> execute -> infect, isolate -> disconnect). */
-/* It plays once, then rests; hovering a method lights its routes again. */
+/* Static diagram of two Cybersecurity calls: launch -> execute -> infect, isolate -> disconnect. */
+/* Plays once when visible; hovering a method lights its routes. */
 const HERO_ROUTES = [
     { from: "Attacker.launch", to: "MalwareAttack.execute" },
     { from: "MalwareAttack.execute", to: "Device.infect" },
@@ -129,8 +125,7 @@ function heroMethod(id) {
    Route Geometry
    ========================= */
 
-/* Like routes.js: calls between side-by-side columns run along a bus in the gap. */
-/* Calls within a column, and every call once the columns stack, run along a spine on the left. */
+/* Calls between columns use a bus in the gap; calls within a column use a left spine. */
 function heroRouteGeometry(route, box) {
     const measure = function(element) {
         const rect = element.getBoundingClientRect();

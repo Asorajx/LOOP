@@ -2,8 +2,7 @@
    Theme
    ========================= */
 
-/* Plain light/dark theme: white or near-black surfaces, one accent colour, and a colour per actor panel. */
-/* The <head> script sets data-theme before the page is drawn: the saved choice, or else the system setting. */
+/* Light and dark theme tokens, selected by data-theme on <html>. */
 :root {
     color-scheme: light;
     --bg: #ffffff;
@@ -34,6 +33,17 @@
     --inheritance: #7c3aed;
     --inheritance-soft: #f5f3ff;
     --property: #d97706;
+    /* Circuit colours by relationship: call, super() and property. */
+    --route-call: #0284c7;
+    --route-super: var(--inheritance);
+    --route-property: #b45309;
+    /* Code highlighting and idle circuit opacity, set per theme. */
+    --code-dim: 0.88;
+    --code-executed-bg: color-mix(in srgb, var(--text) 4%, transparent);
+    --code-waiting-bg: color-mix(in srgb, var(--text) 9%, transparent);
+    --code-waiting-bar: var(--muted);
+    --circuit-idle: 0.3;
+    --circuit-receded: 0.1;
     --current-line: #fef9c3;
     --current-bar: #eab308;
 
@@ -78,6 +88,13 @@
     --inheritance: #a78bfa;
     --inheritance-soft: rgba(167, 139, 250, 0.13);
     --property: #fbbf24;
+    --route-call: #38bdf8;
+    --route-property: #f59e0b;
+    --code-dim: 0.6;
+    --code-executed-bg: color-mix(in srgb, var(--text) 5%, transparent);
+    --code-waiting-bg: color-mix(in srgb, var(--text) 11%, transparent);
+    --circuit-idle: 0.16;
+    --circuit-receded: 0.07;
     --current-line: rgba(234, 179, 8, 0.16);
     --current-bar: #facc15;
 
@@ -88,9 +105,7 @@
 }
 
 
-/* Workspace: the Playground's surface. The page background uses it too, but only shows around */
-/* the Playground (the hero and fundamentals bands cover the rest). Inside the Playground --bg */
-/* is set to it, so the active tab, buttons and pickers always match the surface exactly. */
+/* The Playground's background; also the page background. */
 :root {
     --workspace: var(--bg);
 }
@@ -171,10 +186,7 @@ a {
    ========================= */
 
 /* Adapted from Uiverse.io by andrew-demchenk0 (MIT License). */
-/* A small physical push button: a raised circle on an offset shadow that presses down into it. */
-/* Dark mode shows the sun (press for light); light mode shows the moon (press for dark). */
-/* The icon follows data-theme rather than :checked, so it is correct before app.js runs. */
-/* The negative block margin keeps the header row the same height as before. */
+/* A raised round button that presses into its shadow. The icon follows data-theme. */
 .theme-button {
     --button-bg: #ffffff;
     --button-main: #323232;
@@ -275,9 +287,7 @@ a {
    OOP Fundamentals (placeholder)
    ========================= */
 
-/* A full-width band one step lighter than the page (darker in light mode), so the reference material reads as its */
-/* own part of the page between the hero and the Playground, with no divider lines. The spread shadow paints */
-/* the tint edge to edge without changing the layout; clip-path trims it to the section's height. */
+/* Full-width tinted band: the spread shadow reaches the window edges; clip-path trims it vertically. */
 .fundamentals {
     padding-block: 48px;
     background: var(--surface-section);
@@ -340,19 +350,8 @@ a {
     scroll-margin-top: 16px;
 }
 
-/* Scenario tabs, like the tabs of a code editor. The strip behind them continues the fundamentals */
-/* band, and a thin line marks the top edge of the Playground. The active tab is the Playground's */
-/* own colour and covers that line, so it opens straight into the workspace below. */
-/* No container is added: the strip and line reach the window edges with the same spread-shadow */
-/* trick as the section bands, so the Playground keeps its width and padding. */
-/* The negative margin closes the section gap, so the strip meets the fundamentals band; */
-/* the band's own bottom padding keeps the space above the tabs. */
-/* A second, offset outline frames the Playground window, recalling the layered look of the */
-/* earlier angular buttons: the top line's path (along the line, up and around the active tab, */
-/* back along the line) moved 3px right and up. Here it is a rule 3px above the top line, across */
-/* the Playground's width (not the viewport), fading out towards each end. The active tab draws */
-/* its own part (.scenario-tab-frame) and hides the rule behind its fill. --frame is its colour. */
-/* The clip allows 3px above the strip for the active tab's part of the frame. */
+/* Scenario tab strip: continues the fundamentals band, with a line along the Playground's top edge. */
+/* ::before is the offset frame rule 3px above that line, fading out at both ends. */
 .scenario-bar {
     --frame: color-mix(in srgb, var(--text) 50%, var(--surface-section));
     position: relative;
@@ -385,9 +384,7 @@ a {
     content: "";
 }
 
-/* The tabs scroll sideways inside the strip when they don't fit (phones); the page never does. */
-/* The padding gives the active tab's frame room above and at the end of the row; the negative */
-/* margin cancels the top padding, so the tabs sit exactly where they would without it. */
+/* Tabs scroll sideways when they don't fit. Padding leaves room for the active tab's frame. */
 .scenario-tabs {
     position: relative;
     z-index: 1;
@@ -405,10 +402,8 @@ a {
     display: none;
 }
 
-/* Two layers share one angular shape (a cut top-left corner): ::before is the outline, ::after the */
-/* fill, inset by 1px on three sides so the outline follows the bevel too. The fill's corner cut is */
-/* 1.4px smaller, which keeps the bevel's outline the same 1px as the straight edges. */
 /* Shape and sliced-text glitch loosely adapted from a Uiverse.io design by rubyreapergaming (MIT License). */
+/* Bevelled tab: ::before is the outline, ::after the fill, inset 1px. */
 .scenario-tab {
     --edge: transparent;
     --fill: transparent;
@@ -445,8 +440,7 @@ a {
     clip-path: polygon(9px 0, 100% 0, 100% 100%, 0 100%, 0 9px);
 }
 
-/* Inactive fills stop 4px short of the bottom, so the top line and the offset rule above it */
-/* both show under them, even on hover. */
+/* Inactive fills stop 4px short, so the lines below stay visible. */
 .scenario-tab::after {
     inset: 1px 1px 4px;
     background: var(--fill);
@@ -458,8 +452,7 @@ a {
     color: var(--text);
 }
 
-/* The active tab's fill reaches the bottom and covers the line, and its outline meets the line */
-/* at both bottom corners, so the tab and the workspace read as one surface. */
+/* The active fill covers the line, joining the tab to the workspace. */
 .scenario-tab.active {
     --edge: var(--border-strong);
     --fill: var(--bg);
@@ -473,10 +466,7 @@ a {
     transition: none;
 }
 
-/* The active tab's part of the offset frame: its own shape moved 3px right and up, ending on the */
-/* offset rule. A --frame shape with a strip-coloured shape 1px inside it, so only a thin stroke */
-/* shows. The tab's layers cover its left side, so it shows along the bevel, the top and the right */
-/* side, and steps down into the rule. */
+/* The active tab's offset frame: its shape shifted 3px right and up, drawn as a 1px stroke. */
 .scenario-tab-frame {
     display: none;
 }
@@ -519,9 +509,7 @@ a {
     outline-offset: -4px;
 }
 
-/* The glitch: a copy of the title on the tab's fill, with a red/cyan split, shown only while the */
-/* slices run. On hover or keyboard focus it jumps through a few horizontal slices once (450ms) */
-/* and ends fully clipped away. Its left padding skips the dot, so the copy lines up with the title. */
+/* Glitch: a red/cyan copy of the title, sliced once on hover or focus, then hidden. */
 .scenario-tab-glitch {
     position: absolute;
     inset: 1px 1px 1px;

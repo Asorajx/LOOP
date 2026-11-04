@@ -2,11 +2,8 @@
    Hero
    ========================= */
 
-/* Copy on the left, a small object diagram on the right. Borderless, like the sections below. */
-/* The diagram takes only the width it needs; the copy leads and takes the rest. */
-/* The arrow has its own row, so the copy and the diagram centre on each other. */
-/* A faint full-width band: the spread shadow reaches the top of the page and down through the */
-/* section gap, so it meets the fundamentals band with no strip of page colour between them. */
+/* Copy on the left, diagram on the right, scroll arrow on its own row. */
+/* The spread shadow extends the band to the window edges and down to the fundamentals band. */
 .hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -100,10 +97,8 @@
    Hero Diagram
    ========================= */
 
-/* Three actor columns in the Playground's panel colours, with right-angled routes drawn by hero.js. */
-/* Every row sits on one grid (--row), so rows line up across columns and routes meet them squarely. */
-/* The type scales gently with the window, so the diagram keeps its proportions beside the copy. */
-/* The left padding leaves room for the spine that same-column calls run along. */
+/* Three actor columns on a shared row grid (--row); hero.js draws the routes. */
+/* Left padding leaves room for the same-column spine. */
 .hero-diagram {
     --diagram-font: clamp(13px, 1.05vw, 15.5px);
     --row: calc(var(--diagram-font) * 1.8);
@@ -195,8 +190,7 @@
     color: var(--muted);
 }
 
-/* Changed values use the Playground's status tones: the colour eases in and the value flashes once. */
-/* Room for "False" (5 characters) is kept, so True <-> False never moves the columns. */
+/* Changed values take a status colour and flash once. Width fits "False" so columns don't move. */
 .hero-state dd {
     min-width: calc(5ch + 6px);
     padding: 0 3px;
