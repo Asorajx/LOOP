@@ -27,8 +27,8 @@ function setStatus(text) {
    ========================= */
 
 /* Tabs are generated from the scenarios the server finds, so a new scenario folder adds a tab. */
-/* Each tab carries a hidden copy of its title that the CSS glitch slices on hover or focus. */
-/* Clicking the tab that is already selected does nothing, so it never reloads the same scenario. */
+/* Each tab has a dot in its scenario's colour, and a hidden copy of its title that the CSS glitch */
+/* slices on hover or focus. Clicking the tab that is already selected does nothing. */
 async function loadScenarioTabs() {
     const scenarios = await requestJson("/api/scenarios");
     const tabs = document.getElementById("scenario-tabs");
@@ -38,7 +38,8 @@ async function loadScenarioTabs() {
         const tab = makeElement("button", "scenario-tab");
         const glitch = makeElement("span", "scenario-tab-glitch", scenario.title);
         glitch.setAttribute("aria-hidden", "true");
-        tab.append(makeElement("span", "scenario-tab-label", scenario.title), glitch);
+        tab.append(makeElement("span", "scenario-tab-frame"), makeElement("span", "scenario-tab-dot"),
+            makeElement("span", "scenario-tab-label", scenario.title), glitch);
         tab.type = "button";
         tab.setAttribute("role", "tab");
         tab.setAttribute("aria-label", scenario.title);
@@ -63,8 +64,9 @@ async function selectScenario(scenarioId) {
     const data = await requestJson(`/api/scenarios/${encodeURIComponent(scenarioId)}`);
     loop.scenarioId = scenarioId;
     loop.data = data;
-    /* Lets panels.css give this scenario's actor panels their own colours. */
-    document.getElementById("playground").dataset.scenario = scenarioId;
+    /* Lets panels.css give this scenario's actor panels their own colours. It's set on the panels, */
+    /* not the whole Playground, so the tabs keep their own scenario's colours. */
+    document.getElementById("actor-space").dataset.scenario = scenarioId;
     loop.state = data.state;
 
     closeTargetPicker();

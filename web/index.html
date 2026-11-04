@@ -141,7 +141,10 @@
 
     <!-- Scenario tabs, actor panels and Terminal cards are filled in by the scripts below. -->
     <main class="playground" id="playground">
-        <nav class="scenario-tabs" id="scenario-tabs" role="tablist" aria-label="Scenarios"></nav>
+        <!-- The tab strip ends the fundamentals band; the active tab opens into the Playground below. -->
+        <div class="scenario-bar">
+            <nav class="scenario-tabs" id="scenario-tabs" role="tablist" aria-label="Scenarios"></nav>
+        </div>
 
         <section class="controls" aria-label="Playback">
             <div class="button-group">

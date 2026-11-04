@@ -88,6 +88,13 @@
 }
 
 
+/* Workspace: the Playground's surface. The page background uses it too, but only shows around */
+/* the Playground (the hero and fundamentals bands cover the rest). Inside the Playground --bg */
+/* is set to it, so the active tab, buttons and pickers always match the surface exactly. */
+:root {
+    --workspace: var(--bg);
+}
+
 /* =========================
    Base Styles
    ========================= */
@@ -104,7 +111,7 @@ html {
 
 body {
     min-height: 100vh;
-    background: var(--bg);
+    background: var(--workspace);
     color: var(--text);
     font-family: var(--font-sans);
     font-size: 16px;
@@ -326,120 +333,211 @@ a {
    ========================= */
 
 .playground {
+    --bg: var(--workspace);
     display: flex;
     flex-direction: column;
     gap: 28px;
     scroll-margin-top: 16px;
 }
 
-/* Scenario tabs: angular, layered buttons with a little cyber character, as a contrast to the calm page. */
-/* Inspired by a Uiverse.io design by rubyreapergaming (MIT License): its silhouette, offset layer, */
-/* red/navy contrast and sliced-text glitch, reworked here (pixel corners, LOOP's font, a one-shot glitch). */
-/* The padding leaves room for the offset layer and glitch, so the scroll box never clips them. */
-/* Trial: no divider line below the tabs (it was box-shadow: inset 0 -1px 0 var(--border), with 14px bottom padding). */
-/* Tabs wrap onto a second row on narrow screens, so no scenario is hidden off the edge. */
-.scenario-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 14px;
-    padding: 4px 8px 6px 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-/* Unselected: red plate on a dark-red layer. Selected: navy plate on an outline layer that rests softened */
-/* (grey in dark mode, pale indigo in light mode) and brightens with the glitch on hover or focus. */
-/* Pixel corners keep every tab's bevels the same whatever the title's length. */
-/* The button is 32px tall like the playback buttons (a comfortable target); the plate is inset to 26px. */
-.scenario-tab {
-    --plate: #d6303c;
-    --plate-hover: #b82533;
-    --layer: #631e29;
-    --shift: 2px;
-    --clip: polygon(7px 0, calc(100% - 4px) 0, 100% 6px, 100% calc(100% - 4px),
-        calc(100% - 5px) calc(100% - 4px), calc(100% - 5px) 100%, 6px 100%, 0 calc(100% - 6px));
-    --pad: 0 18px 0 14px;
+/* Scenario tabs, like the tabs of a code editor. The strip behind them continues the fundamentals */
+/* band, and a thin line marks the top edge of the Playground. The active tab is the Playground's */
+/* own colour and covers that line, so it opens straight into the workspace below. */
+/* No container is added: the strip and line reach the window edges with the same spread-shadow */
+/* trick as the section bands, so the Playground keeps its width and padding. */
+/* The negative margin closes the section gap, so the strip meets the fundamentals band; */
+/* the band's own bottom padding keeps the space above the tabs. */
+/* A second, offset outline frames the Playground window, recalling the layered look of the */
+/* earlier angular buttons: the top line's path (along the line, up and around the active tab, */
+/* back along the line) moved 3px right and up. Here it is a rule 3px above the top line, across */
+/* the Playground's width (not the viewport), fading out towards each end. The active tab draws */
+/* its own part (.scenario-tab-frame) and hides the rule behind its fill. --frame is its colour. */
+/* The clip allows 3px above the strip for the active tab's part of the frame. */
+.scenario-bar {
+    --frame: color-mix(in srgb, var(--text) 50%, var(--surface-section));
     position: relative;
-    z-index: 0;
-    flex: 0 0 auto;
-    height: 32px;
-    padding: var(--pad);
-    color: #ffffff;
-    background: none;
-    border: 0;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
+    margin-top: calc(var(--section-gap) * -1);
+    background: var(--surface-section);
+    box-shadow: 0 0 0 100vmax var(--surface-section);
+    clip-path: inset(-3px -100vmax 0);
 }
 
-.scenario-tab.active {
-    --plate: #161a25;
-    --plate-hover: #1f2535;
-    --layer: color-mix(in srgb, var(--accent) 50%, var(--bg));
-    --layer-lit: var(--accent);
-    cursor: default;
-}
-
-[data-theme="dark"] .scenario-tab.active {
-    --layer: #71717a;
-    --layer-lit: #f4f4f5;
-}
-
-.scenario-tab.active:is(:hover, :focus-visible) {
-    --layer: var(--layer-lit);
-}
-
-/* ::before is the offset layer, ::after the plate; both share the clipped silhouette. */
-/* The layer sits 2px right and down: the theme button's raised offset, a step quieter. */
-.scenario-tab::before,
-.scenario-tab::after {
+.scenario-bar::before {
     position: absolute;
-    inset: 3px 0;
-    z-index: -1;
-    clip-path: var(--clip);
+    right: 0;
+    bottom: 3px;
+    left: 0;
+    height: 1px;
+    background: var(--frame);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
     content: "";
 }
 
-.scenario-tab::before {
-    background: var(--layer);
-    transform: translate(var(--shift), var(--shift));
-    transition: background-color 0.15s ease;
+.scenario-bar::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: var(--border-strong);
+    box-shadow: 0 0 0 100vmax var(--border-strong);
+    clip-path: inset(0 -100vmax);
+    content: "";
 }
 
+/* The tabs scroll sideways inside the strip when they don't fit (phones); the page never does. */
+/* The padding gives the active tab's frame room above and at the end of the row; the negative */
+/* margin cancels the top padding, so the tabs sit exactly where they would without it. */
+.scenario-tabs {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    margin-top: -3px;
+    padding: 3px 4px 0 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+.scenario-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Two layers share one angular shape (a cut top-left corner): ::before is the outline, ::after the */
+/* fill, inset by 1px on three sides so the outline follows the bevel too. The fill's corner cut is */
+/* 1.4px smaller, which keeps the bevel's outline the same 1px as the straight edges. */
+/* Shape and sliced-text glitch loosely adapted from a Uiverse.io design by rubyreapergaming (MIT License). */
+.scenario-tab {
+    --edge: transparent;
+    --fill: transparent;
+    --pad: 0 18px 0 16px;
+    position: relative;
+    z-index: 0;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: var(--pad);
+    color: var(--muted);
+    background: none;
+    border: 0;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.14s ease;
+}
+
+.scenario-tab::before,
 .scenario-tab::after {
-    background: var(--plate);
-    transition: background-color 0.15s ease;
+    position: absolute;
+    z-index: -1;
+    content: "";
+    transition: background-color 0.14s ease;
 }
 
-.scenario-tab:hover::after {
-    background: var(--plate-hover);
+.scenario-tab::before {
+    inset: 0;
+    background: var(--edge);
+    clip-path: polygon(9px 0, 100% 0, 100% 100%, 0 100%, 0 9px);
 }
 
+/* Inactive fills stop 4px short of the bottom, so the top line and the offset rule above it */
+/* both show under them, even on hover. */
+.scenario-tab::after {
+    inset: 1px 1px 4px;
+    background: var(--fill);
+    clip-path: polygon(8.4px 0, 100% 0, 100% 100%, 0 100%, 0 8.4px);
+}
+
+.scenario-tab:hover {
+    --fill: color-mix(in srgb, var(--text) 6%, var(--surface-section));
+    color: var(--text);
+}
+
+/* The active tab's fill reaches the bottom and covers the line, and its outline meets the line */
+/* at both bottom corners, so the tab and the workspace read as one surface. */
+.scenario-tab.active {
+    --edge: var(--border-strong);
+    --fill: var(--bg);
+    color: var(--text);
+    cursor: default;
+}
+
+/* No fade on the active fill: it changes in the same frame as the workspace, so it never looks detached. */
+.scenario-tab.active::after {
+    bottom: 0;
+    transition: none;
+}
+
+/* The active tab's part of the offset frame: its own shape moved 3px right and up, ending on the */
+/* offset rule. A --frame shape with a strip-coloured shape 1px inside it, so only a thin stroke */
+/* shows. The tab's layers cover its left side, so it shows along the bevel, the top and the right */
+/* side, and steps down into the rule. */
+.scenario-tab-frame {
+    display: none;
+}
+
+.scenario-tab.active .scenario-tab-frame {
+    position: absolute;
+    z-index: -2;
+    inset: -3px -3px 3px 3px;
+    display: block;
+    background: var(--frame);
+    clip-path: polygon(9px 0, 100% 0, 100% 100%, 0 100%, 0 9px);
+}
+
+.scenario-tab.active .scenario-tab-frame::before {
+    position: absolute;
+    inset: 1px 1px 0;
+    background: var(--surface-section);
+    clip-path: polygon(8.4px 0, 100% 0, 100% 100%, 0 100%, 0 8.4px);
+    content: "";
+}
+
+/* A dot in the scenario's identifying colour (--scenario-dot in panels.css), full strength on the active tab. */
+.scenario-tab-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    background: var(--scenario-dot, var(--panel-1));
+    border-radius: 50%;
+    opacity: 0.5;
+    transition: opacity 0.14s ease;
+}
+
+.scenario-tab:is(.active, :hover) .scenario-tab-dot {
+    opacity: 1;
+}
+
+/* Inside the tab, because the strip clips anything outside it. */
 .scenario-tab:focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 4px;
+    outline-offset: -4px;
 }
 
-/* The glitch: a copy of the title on the plate's colour, with a red/cyan split, shown only while */
-/* the slices run. On hover or keyboard focus it jumps through a few horizontal slices once (450ms) */
-/* and ends fully clipped away. Nothing runs at rest. */
+/* The glitch: a copy of the title on the tab's fill, with a red/cyan split, shown only while the */
+/* slices run. On hover or keyboard focus it jumps through a few horizontal slices once (450ms) */
+/* and ends fully clipped away. Its left padding skips the dot, so the copy lines up with the title. */
 .scenario-tab-glitch {
     position: absolute;
-    inset: 3px 0;
+    inset: 1px 1px 1px;
     display: none;
-    place-items: center;
+    align-items: center;
     padding: var(--pad);
-    background: var(--plate);
-    text-shadow: -2px 0 rgba(255, 70, 100, 0.85), 2px 0 rgba(70, 225, 255, 0.85);
+    padding-left: calc(var(--pad-left, 16px) + 14px - 1px);
+    background: var(--fill);
+    text-shadow: -1.5px 0 rgba(255, 70, 100, 0.8), 1.5px 0 rgba(70, 225, 255, 0.8);
     clip-path: inset(50% 0 50% 0);
     pointer-events: none;
 }
 
 .scenario-tab:hover .scenario-tab-glitch,
 .scenario-tab:focus-visible .scenario-tab-glitch {
-    display: grid;
+    display: flex;
     animation: scenario-glitch 450ms steps(1, end) 1;
 }
 
@@ -453,9 +551,19 @@ a {
     100% { clip-path: inset(50% 0 50% 0); transform: none; }
 }
 
+/* Phones: slightly tighter tabs, so all three usually fit without scrolling. */
+@media (max-width: 640px) {
+    .scenario-tab {
+        --pad: 0 13px 0 12px;
+        --pad-left: 12px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .scenario-tab,
     .scenario-tab::before,
-    .scenario-tab::after {
+    .scenario-tab::after,
+    .scenario-tab-dot {
         transition: none;
     }
 
