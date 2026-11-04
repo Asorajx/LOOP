@@ -2,7 +2,8 @@
 
 A scenario is a folder in scenarios/ with a scenario.py that defines:
     TITLE    the tab name
-    PANELS   list of (panel title, [classes])
+    ORDER    optional tab position (lower first); scenarios without one come last
+    PANELS   list of (panel title, [classes]), two or three panels
     ACTIONS  list of action dicts (see scenarios/cybersecurity/scenario.py)
     STATUS   optional {attribute: settings} drawn as status icons
     build()  returns {label: object} for a fresh simulation; an object's
@@ -22,11 +23,12 @@ TARGET = "<target>"
 
 
 def load_scenarios():
+    """Every scenario folder, in tab order: by ORDER, then by folder name."""
     found = {}
     for info in pkgutil.iter_modules(scenario_package.__path__):
         if info.ispkg:
             found[info.name] = importlib.import_module(f"scenarios.{info.name}.scenario")
-    return found
+    return dict(sorted(found.items(), key=lambda item: (getattr(item[1], "ORDER", float("inf")), item[0])))
 
 
 def all_classes(scenario):

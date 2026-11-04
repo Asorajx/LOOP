@@ -8,6 +8,7 @@ from .devices import Connection, Device
 from .victim import Victim
 
 TITLE = "Cybersecurity"
+ORDER = 1
 
 PANELS = [
     ("Attacker", [Attacker, Attack, MalwareAttack, RansomwareAttack, InterceptAttack]),

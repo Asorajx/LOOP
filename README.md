@@ -14,7 +14,13 @@ LOOP (Live Object-Oriented Playground) is an interactive Python OOP visualizer d
 
 Learners read the real Python source of a scenario and click a method to run it. As the code executes, LOOP highlights each line, lights up the method calls between objects, shows how object state changes, and explains every step in plain language.
 
-Scenarios are example contexts for the same OOP ideas. The current version includes a fictional cybersecurity scenario, and new scenarios can be added without changing the playground.
+Scenarios are example contexts for the same OOP ideas, and new scenarios can be added without changing the playground. The current version includes three:
+
+| Scenario | Actors | What it shows best |
+| --- | --- | --- |
+| Cybersecurity | Attacker, Device, Victim | Inheritance, overriding, `super()`, abstraction and polymorphism |
+| Library | Member, Library | Separate objects of one class, object references, delegation, properties and encapsulation |
+| Smart Home | Resident, Home Hub, Devices | Polymorphism, overriding versus inherited methods, `super()` and guarded methods |
 
 ## Goals
 
@@ -34,7 +40,7 @@ Scenarios are example contexts for the same OOP ideas. The current version inclu
 - Status icons showing each object's state, kept between actions
 - A Terminal explaining each step: the story, the code, and the OOP concept
 - Play, Pause, Previous, Next, Replay, and Reset controls
-- Scenario tabs, with scenarios added as separate folders
+- Scenario tabs, with scenarios added as separate folders and their own actor colours
 
 ## Run Locally
 

@@ -63,11 +63,14 @@ async function selectScenario(scenarioId) {
     const data = await requestJson(`/api/scenarios/${encodeURIComponent(scenarioId)}`);
     loop.scenarioId = scenarioId;
     loop.data = data;
+    /* Lets panels.css give this scenario's actor panels their own colours. */
+    document.getElementById("playground").dataset.scenario = scenarioId;
     loop.state = data.state;
 
     closeTargetPicker();
     setKnownRoutes(data.routes);
     renderPanels(data, chooseTarget);
+    setTerminalHint(data.actions[0]);
     clearRun();
     updateObjectStates(loop.state, data);
     setStatus("");

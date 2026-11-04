@@ -2,6 +2,13 @@
    Terminal
    ========================= */
 
+/* Before anything runs, the Terminal suggests the scenario's first action as a starting point. */
+let terminalHint = null;
+
+function setTerminalHint(action) {
+    terminalHint = action ? action.method.split(".") : null;
+}
+
 /* One card per traced step. The current card separates three things: */
 /* Story (what happened), Code (how the highlighted line caused it) and Concept (the OOP idea). */
 /* Earlier cards shrink to one line, and a summary card closes the action. */
@@ -12,9 +19,11 @@ function renderTerminal(run, position, onSelect) {
 
     if (!run) {
         const empty = makeElement("div", "terminal-empty");
+        const [className, methodName] = terminalHint || [];
+        const tryFirst = className ? `Try ${methodName} in ${className}. ` : "";
         empty.append(
             makeElement("strong", "", "Click a method name in the code below to run it."),
-            makeElement("span", "", "Try execute in MalwareAttack. Each step of the real Python code will be explained here.")
+            makeElement("span", "", `${tryFirst}Each step of the real Python code will be explained here.`)
         );
         log.appendChild(empty);
         return;
