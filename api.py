@@ -88,6 +88,13 @@ async def session_middleware(request: Request, call_next):
                     SESSIONS.pop(key, None)
                     SESSION_ATTEMPTS.pop(key, None)
         if len(SESSIONS) >= MAX_SESSIONS:
+            # Still full: drop the visitor idle longest, so a flood of new sessions never locks people out.
+            idle = [(item.last_seen, key) for key, item in SESSIONS.items() if not item.lock.locked()]
+            if idle:
+                _, key = min(idle)
+                SESSIONS.pop(key, None)
+                SESSION_ATTEMPTS.pop(key, None)
+        if len(SESSIONS) >= MAX_SESSIONS:
             return JSONResponse({"detail": "Server busy"}, status_code=503)
         session_id = secrets.token_urlsafe(32)
         session = Session({}, now)
