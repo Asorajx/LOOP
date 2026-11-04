@@ -1,10 +1,12 @@
 /* =========================
-   Status Icons
+   Icons
    ========================= */
 
-/* Small line icons for status indicators, drawn on a 24×24 grid in the current text colour. */
+/* Small line icons for status indicators and links, drawn on a 24×24 grid in the current text colour. */
 /* Scenarios refer to them by name in their STATUS settings. */
 const ICONS = {
+    arrowDown: ["M12 5v14", "M6 13l6 6 6-6"],
+    external: ["M7 17L17 7", "M8 7h9v9"],
     bug: [
         "M9 7a3 3 0 0 1 6 0",
         "M8 11a4 4 0 0 1 8 0v4a4 4 0 0 1-8 0z",

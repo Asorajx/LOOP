@@ -62,10 +62,11 @@ function renderFundamentals() {
     Object.values(CONCEPTS).forEach(function(concept) {
         const card = document.createElement("article");
         card.className = "concept-card";
-        card.innerHTML = `<h3></h3><p></p><a target="_blank" rel="noopener noreferrer">Python docs ↗</a>`;
+        card.innerHTML = `<h3></h3><p></p><a class="icon-link" target="_blank" rel="noopener noreferrer">Python docs<span class="visually-hidden"> (opens in a new tab)</span></a>`;
         card.querySelector("h3").textContent = concept.name;
         card.querySelector("p").textContent = concept.summary;
         card.querySelector("a").href = concept.docs;
+        card.querySelector("a").appendChild(createIcon("external"));
         grid.appendChild(card);
     });
 }

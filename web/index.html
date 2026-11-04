@@ -13,21 +13,81 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/hero.css">
     <link rel="stylesheet" href="css/panels.css">
     <link rel="stylesheet" href="css/playground.css">
+
+    <!-- Hide the hero text until typewriter.js starts typing it, so the full text never flashes first.
+         The timeout shows the text anyway if the script never arrives. -->
+    <script>
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            document.documentElement.classList.add("typewriter-pending");
+            window.setTimeout(() => document.documentElement.classList.remove("typewriter-pending"), 3000);
+        }
+    </script>
 </head>
 <body>
 <div class="page">
 
     <!-- =========================
-         Hero (placeholder)
+         Hero
          ========================= -->
 
     <header class="hero">
         <span class="brand">LOOP</span>
-        <h1>See Python objects at work.</h1>
-        <p>LOOP runs real Python object-oriented code and shows you what each line does: which object runs, which method it calls, and what changes.</p>
-        <a class="hero-link" href="#playground">Open the Playground ↓</a>
+
+        <div class="hero-copy">
+            <h1 data-typewriter="heading">See Python objects at work.</h1>
+            <p data-typewriter="description">LOOP runs real Python object-oriented code and shows you what each line does: which object runs, which method it calls, and what changes.</p>
+            <!-- Same path as the arrowDown icon in icons.js, written inline so it shows before the scripts run. -->
+            <a class="hero-scroll" href="#playground" aria-label="Jump to the Playground" title="Jump to the Playground">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
+            </a>
+        </div>
+
+        <!-- A small picture of the Cybersecurity scenario: the objects, methods and calls match scenarios/cybersecurity. -->
+        <!-- hero.js draws the routes between the methods and plays the two calls once. -->
+        <figure class="hero-diagram" id="hero-diagram" role="img"
+                aria-label="attacker.launch(malware, device_a) calls malware.execute, which calls device_a.infect, so infected changes from False to True. Then victim.isolate(device_a) calls device_a.disconnect, so online changes from True to False.">
+            <svg class="hero-lines" id="hero-lines" aria-hidden="true"></svg>
+
+            <div class="hero-actors">
+                <div class="hero-actor" data-panel="1">
+                    <span class="hero-role">Attacker</span>
+                    <div class="hero-object">
+                        <span class="hero-object-name">attacker<span>: Attacker</span></span>
+                        <span class="hero-method" data-method="Attacker.launch">launch()</span>
+                    </div>
+                    <div class="hero-object">
+                        <span class="hero-object-name">malware<span>: MalwareAttack</span></span>
+                        <span class="hero-method" data-method="MalwareAttack.execute">execute()</span>
+                    </div>
+                </div>
+
+                <div class="hero-actor" data-panel="2">
+                    <span class="hero-role">Device</span>
+                    <div class="hero-object">
+                        <span class="hero-object-name">device_a<span>: Device</span></span>
+                        <span class="hero-method" data-method="Device.infect">infect()</span>
+                        <span class="hero-method" data-method="Device.disconnect">disconnect()</span>
+                        <dl class="hero-state">
+                            <dt>online</dt><dd data-state="online">True</dd>
+                            <dt>infected</dt><dd data-state="infected">False</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="hero-actor" data-panel="3">
+                    <span class="hero-role">Victim</span>
+                    <div class="hero-object">
+                        <span class="hero-object-name">victim<span>: Victim</span></span>
+                        <span class="hero-method" data-method="Victim.isolate">isolate()</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="hero-call"><span>&gt;&gt;&gt;</span> <code id="hero-call">attacker.launch(malware, device_a)</code></p>
+        </figure>
     </header>
 
 
@@ -90,10 +150,12 @@
      ========================= -->
 
 <!-- The scripts share functions, so order matters: data and helpers first, app.js last because it starts the page. -->
+<script src="js/typewriter.js"></script>
 <script src="js/concepts.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/panels.js"></script>
 <script src="js/routes.js"></script>
+<script src="js/hero.js"></script>
 <script src="js/terminal.js"></script>
 <script src="js/playback.js"></script>
 <script src="js/app.js"></script>
