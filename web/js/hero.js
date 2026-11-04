@@ -1,3 +1,96 @@
+/* The hero intro: the headline types itself out and the description fades up after it, */
+/* while the object diagram plays two calls once. */
+/* Both run on their own and need nothing from the Playground except svgElement() from routes.js. */
+
+
+/* =========================
+   Hero Typewriter
+   ========================= */
+
+/* Only the short headline is typed. The longer description fades up as a whole once the headline is done, */
+/* so the page never sits half-written. The fade itself is CSS (.hero-description in hero.css). */
+const typewriterHeading = document.querySelector('[data-typewriter="heading"]');
+const heroDescription = document.querySelector(".hero-description");
+const typewriterReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+const TYPEWRITER_HEADING_SPEED_MS = 40;
+const TYPEWRITER_PAUSE_MS = 250;
+
+/* Keep the full text accessible and its layout space reserved. */
+function prepareTypewriter(element) {
+    const fullText = element.textContent.trim();
+
+    const accessibleText = document.createElement("span");
+    accessibleText.className = "visually-hidden";
+    accessibleText.textContent = fullText;
+
+    const reserve = document.createElement("span");
+    reserve.className = "hero-typewriter-reserve";
+    reserve.textContent = fullText;
+    reserve.setAttribute("aria-hidden", "true");
+
+    const overlay = document.createElement("span");
+    overlay.className = "hero-typewriter-overlay";
+    overlay.setAttribute("aria-hidden", "true");
+
+    const visibleText = document.createElement("span");
+    visibleText.className = "hero-typewriter-text";
+    overlay.appendChild(visibleText);
+
+    element.replaceChildren(accessibleText, reserve, overlay);
+    element.classList.add("hero-typewriter");
+
+    return { element, fullText, visibleText };
+}
+
+/* Type one character at a time, then remove the caret. */
+function typeHeroLine(line, speed) {
+    return new Promise(function(resolve) {
+        let index = 0;
+        line.element.classList.add("is-typing");
+
+        function typeNextCharacter() {
+            if (typewriterReducedMotion.matches) {
+                line.visibleText.textContent = line.fullText;
+                line.element.classList.remove("is-typing");
+                resolve();
+                return;
+            }
+
+            index++;
+            line.visibleText.textContent = line.fullText.slice(0, index);
+
+            if (index < line.fullText.length) {
+                window.setTimeout(typeNextCharacter, speed);
+            } else {
+                line.element.classList.remove("is-typing");
+                resolve();
+            }
+        }
+
+        typeNextCharacter();
+    });
+}
+
+/* Play once: heading, brief pause, then the description fades up. */
+async function startHeroTypewriter() {
+    if (!typewriterHeading || typewriterReducedMotion.matches) {
+        document.documentElement.classList.remove("typewriter-pending");
+        heroDescription?.classList.add("is-shown");
+        return;
+    }
+
+    const heading = prepareTypewriter(typewriterHeading);
+    document.documentElement.classList.remove("typewriter-pending");
+
+    await typeHeroLine(heading, TYPEWRITER_HEADING_SPEED_MS);
+    await new Promise(resolve => window.setTimeout(resolve, TYPEWRITER_PAUSE_MS));
+    heroDescription?.classList.add("is-shown");
+}
+
+startHeroTypewriter();
+
+
 /* =========================
    Hero Diagram
    ========================= */

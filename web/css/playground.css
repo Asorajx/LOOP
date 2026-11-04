@@ -27,9 +27,10 @@
     background: var(--hover);
 }
 
+/* Faint and dimmed: clearly apart from enabled buttons in both themes (dimmer in dark mode). */
 .playback-button:disabled {
     color: var(--faint);
-    opacity: 0.55;
+    opacity: var(--disabled-opacity);
     cursor: default;
 }
 

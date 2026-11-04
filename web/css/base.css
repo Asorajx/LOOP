@@ -3,6 +3,7 @@
    ========================= */
 
 /* Plain light/dark theme: white or near-black surfaces, one accent colour, and a colour per actor panel. */
+/* The <head> script sets data-theme before the page is drawn: the saved choice, or else the system setting. */
 :root {
     color-scheme: light;
     --bg: #ffffff;
@@ -10,9 +11,10 @@
     --hover: #f1f5f9;
     --border: #e5e7eb;
     --border-strong: #d1d5db;
+    /* Three text levels on white: text 17.7:1, muted 6:1 (AA, also on --subtle), faint 3.8:1 for small labels. */
     --text: #111827;
-    --muted: #6b7280;
-    --faint: #9ca3af;
+    --muted: #5b6472;
+    --faint: #7c8390;
 
     --accent: #4f46e5;
     --accent-hover: #4338ca;
@@ -32,42 +34,52 @@
     --current-line: #fef9c3;
     --current-bar: #eab308;
 
+    /* Status tones, darker in light mode so small text on white stays readable. */
+    --danger: #dc2626;
+    --warning: #b45309;
+    --good: #15803d;
+    /* Faint is darker now, so disabled controls dim slightly to stay clearly apart from enabled ones. */
+    --disabled-opacity: 0.75;
+
     --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
     --radius: 10px;
 }
 
 /* Dark mode only swaps these tokens. Components use the tokens, so they need no dark-mode rules of their own. */
-@media (prefers-color-scheme: dark) {
-    :root {
-        color-scheme: dark;
-        --bg: #0b0b0d;
-        --subtle: #131316;
-        --hover: #1b1b1f;
-        --border: #26262b;
-        --border-strong: #3a3a41;
-        --text: #f4f4f5;
-        --muted: #a1a1aa;
-        --faint: #71717a;
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0b0b0d;
+    --subtle: #131316;
+    --hover: #1b1b1f;
+    --border: #26262b;
+    --border-strong: #3a3a41;
+    --text: #f4f4f5;
+    --muted: #a1a1aa;
+    --faint: #71717a;
 
-        --accent: #818cf8;
-        --accent-hover: #a5b4fc;
-        --accent-soft: rgba(129, 140, 248, 0.14);
-        --on-accent: #0b0b0d;
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --accent-soft: rgba(129, 140, 248, 0.14);
+    --on-accent: #0b0b0d;
 
-        --panel-1: #fb7185;
-        --panel-1-soft: rgba(251, 113, 133, 0.12);
-        --panel-2: #38bdf8;
-        --panel-2-soft: rgba(56, 189, 248, 0.12);
-        --panel-3: #34d399;
-        --panel-3-soft: rgba(52, 211, 153, 0.12);
+    --panel-1: #fb7185;
+    --panel-1-soft: rgba(251, 113, 133, 0.12);
+    --panel-2: #38bdf8;
+    --panel-2-soft: rgba(56, 189, 248, 0.12);
+    --panel-3: #34d399;
+    --panel-3-soft: rgba(52, 211, 153, 0.12);
 
-        --inheritance: #a78bfa;
-        --inheritance-soft: rgba(167, 139, 250, 0.13);
-        --property: #fbbf24;
-        --current-line: rgba(234, 179, 8, 0.16);
-        --current-bar: #facc15;
-    }
+    --inheritance: #a78bfa;
+    --inheritance-soft: rgba(167, 139, 250, 0.13);
+    --property: #fbbf24;
+    --current-line: rgba(234, 179, 8, 0.16);
+    --current-bar: #facc15;
+
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --good: #22c55e;
+    --disabled-opacity: 0.55;
 }
 
 
@@ -139,6 +151,99 @@ a {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+}
+
+
+/* =========================
+   Theme Button
+   ========================= */
+
+/* Adapted from Uiverse.io by andrew-demchenk0 (MIT License). */
+/* A small physical push button: a raised circle on an offset shadow that presses down into it. */
+/* Dark mode shows the sun (press for light); light mode shows the moon (press for dark). */
+/* The icon follows data-theme rather than :checked, so it is correct before app.js runs. */
+/* The negative block margin keeps the header row the same height as before. */
+.theme-button {
+    --button-bg: #ffffff;
+    --button-main: #323232;
+    position: relative;
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: -5px 0;
+    background-color: var(--button-bg);
+    border: 2px solid var(--button-main);
+    border-radius: 50%;
+    box-shadow: 3px 3px var(--button-main);
+    transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+/* In dark mode the face is lifted off the page and the edge brightened, so it reads as a raised button, not a ring. */
+[data-theme="dark"] .theme-button {
+    --button-bg: #27272a;
+    --button-main: #e4e4e7;
+}
+
+/* The invisible checkbox covers the button and reaches past it, for a 48px touch target. */
+.theme-button-input {
+    position: absolute;
+    z-index: 1;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.theme-button-icon {
+    position: absolute;
+    top: calc(50% - 13px);
+    left: calc(50% - 13px);
+    width: 26px;
+    height: 26px;
+}
+
+.theme-button-moon {
+    fill: var(--button-main);
+}
+
+.theme-button-sun {
+    display: none;
+    fill: none;
+    stroke: var(--button-main);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+[data-theme="dark"] .theme-button-sun {
+    display: block;
+}
+
+[data-theme="dark"] .theme-button-moon {
+    display: none;
+}
+
+/* Pressing (by mouse, touch or Space) moves the button into its shadow. */
+.theme-button:active,
+.theme-button:has(.theme-button-input:active) {
+    box-shadow: 0 0 var(--button-main);
+    transform: translate(3px, 3px);
+}
+
+.theme-button:has(.theme-button-input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-button {
+        transition: none;
+    }
 }
 
 .page {

@@ -289,9 +289,9 @@
     cursor: pointer;
 }
 
-.status[data-tone="danger"] { --tone: #ef4444; }
-.status[data-tone="warning"] { --tone: #f59e0b; }
-.status[data-tone="good"] { --tone: #22c55e; }
+.status[data-tone="danger"] { --tone: var(--danger); }
+.status[data-tone="warning"] { --tone: var(--warning); }
+.status[data-tone="good"] { --tone: var(--good); }
 
 .status[data-tone="normal"] {
     opacity: 0.55;

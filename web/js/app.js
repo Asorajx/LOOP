@@ -165,6 +165,45 @@ async function resetScenario() {
 
 
 /* =========================
+   Theme Switch
+   ========================= */
+
+/* The <head> script has already set data-theme before the page was drawn. */
+/* This keeps the switch in step with it, saves the visitor's choice, and */
+/* follows the system setting until the visitor picks a theme themselves. */
+const THEME_KEY = "loop-theme";
+const themeToggle = document.getElementById("theme-toggle");
+const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+/* localStorage can be missing or blocked (private windows, strict settings), so every access is guarded. */
+function savedTheme() {
+    try {
+        const theme = localStorage.getItem(THEME_KEY);
+        return theme === "dark" || theme === "light" ? theme : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+/* Screen readers hear a "Dark mode" switch and its state; the tooltip names what pressing it will do. */
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    themeToggle.checked = theme === "dark";
+    themeToggle.closest("label").title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+}
+
+function chooseTheme() {
+    const theme = themeToggle.checked ? "dark" : "light";
+    applyTheme(theme);
+    try {
+        localStorage.setItem(THEME_KEY, theme);
+    } catch (error) {
+        /* The choice still applies for this visit; it just won't be remembered. */
+    }
+}
+
+
+/* =========================
    Event Listeners
    ========================= */
 
@@ -183,11 +222,15 @@ document.getElementById("toggle-lines").addEventListener("click", function() {
     this.textContent = show ? "Hide line numbers" : "Show line numbers";
 });
 
+themeToggle.addEventListener("change", chooseTheme);
+systemDark.addEventListener("change", event => { if (!savedTheme()) applyTheme(event.matches ? "dark" : "light"); });
+
 
 /* =========================
    Start
    ========================= */
 
+applyTheme(savedTheme() || (systemDark.matches ? "dark" : "light"));
 renderFundamentals();
 loadScenarioTabs().catch(function(error) {
     setStatus("Could not reach the LOOP server. Start it with: python -m uvicorn api:app");

@@ -9,7 +9,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-        "brand brand"
+        "bar bar"
         "copy diagram"
         "arrow .";
     align-items: center;
@@ -17,9 +17,16 @@
     padding-bottom: 16px;
 }
 
-.brand {
-    grid-area: brand;
+/* LOOP on the left, the theme switch on the right. */
+.hero-bar {
+    grid-area: bar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 48px;
+}
+
+.brand {
     color: var(--accent);
     font-size: 14px;
     font-weight: 700;
@@ -194,8 +201,8 @@
     transition: color 0.3s ease;
 }
 
-.hero-state dd[data-tone="danger"] { --tone: #ef4444; color: var(--tone); }
-.hero-state dd[data-tone="warning"] { --tone: #f59e0b; color: var(--tone); }
+.hero-state dd[data-tone="danger"] { --tone: var(--danger); color: var(--tone); }
+.hero-state dd[data-tone="warning"] { --tone: var(--warning); color: var(--tone); }
 
 .hero-state dd.changed {
     animation: hero-value-flash 0.9s ease-out;
@@ -263,6 +270,19 @@
    ========================= */
 
 /* hero-motion is set in <head> when motion is allowed, so nothing flashes before hero.js runs. */
+
+/* The description waits until the headline has typed, then fades up 6px once. Its space is always kept. */
+.hero-motion .hero-description {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 500ms ease, transform 500ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.hero-motion .hero-description.is-shown {
+    opacity: 1;
+    transform: none;
+}
+
 /* The diagram waits, hidden, until it scrolls into view; then the columns rise in turn and the lines fade in. */
 .hero-motion .hero-diagram:not(.is-visible) :is(.hero-actor, .hero-lines, .hero-call) {
     opacity: 0;
@@ -292,7 +312,7 @@
    Hero Typewriter
    ========================= */
 
-/* Hidden until typewriter.js takes over; visibility keeps the space reserved. */
+/* Hidden until hero.js takes over; visibility keeps the space reserved. */
 .typewriter-pending [data-typewriter] {
     visibility: hidden;
 }
@@ -339,13 +359,13 @@
     .hero {
         grid-template-columns: minmax(0, 1fr);
         grid-template-areas:
-            "brand"
+            "bar"
             "copy"
             "diagram"
             "arrow";
     }
 
-    .brand {
+    .hero-bar {
         margin-bottom: 40px;
     }
 
@@ -359,7 +379,7 @@
 
 /* Phones: the columns stack, and every route runs down the spine on the left (hero.js detects this). */
 @media (max-width: 640px) {
-    .brand {
+    .hero-bar {
         margin-bottom: 32px;
     }
 
