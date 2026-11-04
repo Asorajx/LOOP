@@ -3,19 +3,23 @@
    ========================= */
 
 /* Copy on the left, a small object diagram on the right. Borderless, like the sections below. */
+/* The diagram takes only the width it needs; the copy leads and takes the rest. */
+/* The arrow has its own row, so the copy and the diagram centre on each other. */
 .hero {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
         "brand brand"
-        "copy diagram";
+        "copy diagram"
+        "arrow .";
     align-items: center;
-    gap: 56px 72px;
+    column-gap: 72px;
     padding-bottom: 16px;
 }
 
 .brand {
     grid-area: brand;
+    margin-bottom: 48px;
     color: var(--accent);
     font-size: 14px;
     font-weight: 700;
@@ -32,26 +36,28 @@
 /* 9.5em breaks the heading as "See Python objects / at work." at every size. */
 .hero h1 {
     max-width: 9.5em;
-    font-size: clamp(36px, 3.6vw, 52px);
+    font-size: clamp(36px, 4.4vw, 64px);
     font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
 }
 
+/* 36em keeps the description to two even lines beside the diagram, with no single-word last line. */
 .hero p {
-    max-width: 30em;
+    max-width: 36em;
     color: var(--muted);
-    font-size: 17px;
+    font-size: 18px;
     line-height: 1.65;
 }
 
 /* A single arrow instead of a text prompt. It nudges twice once the typing is done, then rests. */
 .hero-scroll {
+    grid-area: arrow;
     display: inline-grid;
     place-items: center;
     width: 32px;
     height: 32px;
-    margin: 8px 0 0 -6px;
+    margin: 28px 0 0 -6px;
     color: var(--accent);
     border-radius: 50%;
 }
@@ -83,13 +89,20 @@
    ========================= */
 
 /* Three actor columns in the Playground's panel colours, with right-angled routes drawn by hero.js. */
+/* Every row sits on one grid (--row), so rows line up across columns and routes meet them squarely. */
+/* The type scales gently with the window, so the diagram keeps its proportions beside the copy. */
 /* The left padding leaves room for the spine that same-column calls run along. */
 .hero-diagram {
+    --diagram-font: clamp(13px, 1.05vw, 15.5px);
+    --row: calc(var(--diagram-font) * 1.8);
     grid-area: diagram;
     position: relative;
     display: grid;
-    gap: 28px;
-    padding-left: 20px;
+    gap: var(--row);
+    padding-left: 22px;
+    font-family: var(--mono);
+    font-size: var(--diagram-font);
+    line-height: var(--row);
 }
 
 .hero-lines {
@@ -106,23 +119,24 @@
     grid-template-columns: repeat(3, auto);
     justify-content: space-between;
     align-items: start;
-    gap: 24px 48px;
+    gap: var(--row) calc(var(--diagram-font) * 4.4);
 }
 
 .hero-actor { --panel: var(--panel-1); }
 .hero-actor[data-panel="2"] { --panel: var(--panel-2); }
 .hero-actor[data-panel="3"] { --panel: var(--panel-3); }
 
-/* The Victim column sits lower, so its call reaches the Device from beside it rather than across the top. */
+/* The Victim sits two rows down, so isolate() shares a row with execute(): both calls start level. */
 .hero-actor[data-panel="3"] {
-    margin-top: 64px;
+    margin-top: calc(var(--row) * 2);
 }
 
 .hero-role {
     display: block;
-    margin-bottom: 12px;
+    margin-bottom: calc(var(--row) / 2);
     color: var(--panel);
-    font-size: 13px;
+    font-family: var(--font-sans);
+    font-size: 0.9em;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
@@ -131,14 +145,6 @@
 .hero-object {
     display: grid;
     justify-items: start;
-    gap: 2px;
-    font-family: var(--mono);
-    font-size: 14px;
-    line-height: 1.7;
-}
-
-.hero-object + .hero-object {
-    margin-top: 12px;
 }
 
 .hero-object-name {
@@ -147,16 +153,16 @@
 }
 
 .hero-object-name span {
-    color: var(--faint);
+    color: var(--muted);
 }
 
 .hero-method,
 .hero-state {
-    margin-left: 14px;
+    margin-left: 1em;
 }
 
 .hero-method {
-    color: var(--muted);
+    color: color-mix(in srgb, var(--text) 80%, var(--bg));
     white-space: nowrap;
     transition: color 0.15s ease;
 }
@@ -169,20 +175,23 @@
 .hero-state {
     display: grid;
     grid-template-columns: auto auto;
-    gap: 0 14px;
-    margin-top: 10px;
+    gap: 0 1em;
+    margin-top: calc(var(--row) / 2);
 }
 
 .hero-state dt {
-    color: var(--faint);
+    color: var(--muted);
 }
 
-/* Changed values use the Playground's status tones and flash once. */
+/* Changed values use the Playground's status tones: the colour eases in and the value flashes once. */
+/* Room for "False" (5 characters) is kept, so True <-> False never moves the columns. */
 .hero-state dd {
+    min-width: calc(5ch + 6px);
     padding: 0 3px;
     margin-left: -3px;
-    color: var(--muted);
+    color: var(--text);
     border-radius: 4px;
+    transition: color 0.3s ease;
 }
 
 .hero-state dd[data-tone="danger"] { --tone: #ef4444; color: var(--tone); }
@@ -199,9 +208,7 @@
 
 /* The call being run, written as it would be typed at a Python prompt. */
 .hero-call {
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 14px;
+    color: color-mix(in srgb, var(--text) 80%, var(--bg));
     white-space: nowrap;
 }
 
@@ -225,12 +232,12 @@
     stroke: var(--net);
     stroke-width: 1;
     stroke-linecap: square;
-    opacity: 0.3;
+    opacity: 0.35;
 }
 
 .hero-node {
     fill: var(--net);
-    opacity: 0.45;
+    opacity: 0.5;
 }
 
 /* pathLength="1" lets the dash offset draw any route from start to end at the same pace. */
@@ -255,21 +262,25 @@
    Hero Entrance
    ========================= */
 
-/* One short entrance: the columns rise in turn, then the lines and the call fade in. */
-.hero-actor {
+/* hero-motion is set in <head> when motion is allowed, so nothing flashes before hero.js runs. */
+/* The diagram waits, hidden, until it scrolls into view; then the columns rise in turn and the lines fade in. */
+.hero-motion .hero-diagram:not(.is-visible) :is(.hero-actor, .hero-lines, .hero-call) {
+    opacity: 0;
+}
+
+.hero-motion .hero-diagram.is-visible .hero-actor {
     animation: hero-rise 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
-.hero-actor[data-panel="2"] { animation-delay: 0.09s; }
-.hero-actor[data-panel="3"] { animation-delay: 0.18s; }
+.hero-motion .hero-diagram.is-visible .hero-actor[data-panel="2"] { animation-delay: 0.09s; }
+.hero-motion .hero-diagram.is-visible .hero-actor[data-panel="3"] { animation-delay: 0.18s; }
 
-.hero-lines,
-.hero-call {
+.hero-motion .hero-diagram.is-visible :is(.hero-lines, .hero-call) {
     animation: hero-fade 0.4s ease 0.35s both;
 }
 
 @keyframes hero-rise {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
 }
 
 @keyframes hero-fade {
@@ -323,62 +334,66 @@
    Responsive
    ========================= */
 
-/* Copy above the diagram once the two no longer fit side by side. */
-@media (max-width: 1080px) {
+/* Copy above the diagram once the copy would be narrower than the diagram. The arrow ends the hero. */
+@media (max-width: 1280px) {
     .hero {
         grid-template-columns: minmax(0, 1fr);
         grid-template-areas:
             "brand"
             "copy"
-            "diagram";
-        gap: 40px;
+            "diagram"
+            "arrow";
     }
 
+    .brand {
+        margin-bottom: 40px;
+    }
+
+    /* The diagram has its own row here, so its text can be a little larger again. */
     .hero-diagram {
+        --diagram-font: clamp(13px, 2.2vw, 14.5px);
         max-width: 680px;
+        margin-top: 44px;
     }
 }
 
 /* Phones: the columns stack, and every route runs down the spine on the left (hero.js detects this). */
 @media (max-width: 640px) {
-    .hero {
-        gap: 32px;
+    .brand {
+        margin-bottom: 32px;
     }
 
     .hero h1 {
-        font-size: 34px;
+        font-size: 36px;
     }
 
     .hero p {
         font-size: 16px;
     }
 
+    .hero-diagram {
+        --diagram-font: 13.5px;
+        margin-top: 36px;
+    }
+
     .hero-actors {
         grid-template-columns: minmax(0, 1fr);
-        gap: 24px;
     }
 
     .hero-actor[data-panel="3"] {
         margin-top: 0;
     }
-
-    .hero-object,
-    .hero-call {
-        font-size: 12.5px;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .hero-actor,
-    .hero-lines,
-    .hero-call,
     .hero-scroll .icon,
     .hero-state dd.changed {
         animation: none;
     }
 
     .hero-route,
-    .hero-scroll .icon {
+    .hero-scroll .icon,
+    .hero-state dd {
         transition: none;
     }
 }

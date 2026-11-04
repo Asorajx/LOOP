@@ -17,12 +17,15 @@
     <link rel="stylesheet" href="css/panels.css">
     <link rel="stylesheet" href="css/playground.css">
 
-    <!-- Hide the hero text until typewriter.js starts typing it, so the full text never flashes first.
-         The timeout shows the text anyway if the script never arrives. -->
+    <!-- Hide the hero text until typewriter.js starts typing it, and the diagram until hero.js plays it,
+         so neither flashes in full first. The timeout shows both anyway if the scripts never arrive. -->
     <script>
         if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            document.documentElement.classList.add("typewriter-pending");
-            window.setTimeout(() => document.documentElement.classList.remove("typewriter-pending"), 3000);
+            document.documentElement.classList.add("typewriter-pending", "hero-motion");
+            window.setTimeout(function() {
+                document.documentElement.classList.remove("typewriter-pending");
+                if (!document.querySelector(".hero-diagram.is-visible")) document.documentElement.classList.remove("hero-motion");
+            }, 3000);
         }
     </script>
 </head>
@@ -39,14 +42,17 @@
         <div class="hero-copy">
             <h1 data-typewriter="heading">See Python objects at work.</h1>
             <p data-typewriter="description">LOOP runs real Python object-oriented code and shows you what each line does: which object runs, which method it calls, and what changes.</p>
-            <!-- Same path as the arrowDown icon in icons.js, written inline so it shows before the scripts run. -->
-            <a class="hero-scroll" href="#playground" aria-label="Jump to the Playground" title="Jump to the Playground">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
-            </a>
         </div>
 
+        <!-- Its own row under the copy, so the headline and diagram centre on each other. -->
+        <!-- Same path as the arrowDown icon in icons.js, written inline so it shows before the scripts run. -->
+        <a class="hero-scroll" href="#playground" aria-label="Jump to the Playground" title="Jump to the Playground">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
+        </a>
+
         <!-- A small picture of the Cybersecurity scenario: the objects, methods and calls match scenarios/cybersecurity. -->
-        <!-- hero.js draws the routes between the methods and plays the two calls once. -->
+        <!-- hero.js draws the routes between the methods and plays the two calls once, when the diagram comes into view. -->
+        <!-- Rows sit on a shared grid: both calls start on the same row, so the routes read as a pair. -->
         <figure class="hero-diagram" id="hero-diagram" role="img"
                 aria-label="attacker.launch(malware, device_a) calls malware.execute, which calls device_a.infect, so infected changes from False to True. Then victim.isolate(device_a) calls device_a.disconnect, so online changes from True to False.">
             <svg class="hero-lines" id="hero-lines" aria-hidden="true"></svg>

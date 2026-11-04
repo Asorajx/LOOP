@@ -16,7 +16,7 @@ const HERO_STEPS = [
     { call: "victim.isolate(device_a)", routes: [2], state: "online", value: "False", tone: "warning" }
 ];
 
-const HERO_START_MS = 900;
+const HERO_START_MS = 800;
 const HERO_DRAW_MS = 450;
 const HERO_HOLD_MS = 1100;
 const HERO_GAP_MS = 450;
@@ -153,8 +153,16 @@ heroDiagram?.querySelectorAll("[data-method]").forEach(function(method) {
     method.addEventListener("pointerleave", () => !heroPlaying && routes.forEach(index => setHeroRoute(index, false)));
 });
 
+/* Play once, the first time at least 40% of the diagram is on screen. */
 if (heroDiagram) {
     new ResizeObserver(drawHeroLines).observe(heroDiagram);
     document.fonts.ready.then(drawHeroLines);
-    playHeroDiagram();
+
+    const heroObserver = new IntersectionObserver(function(entries) {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        heroObserver.disconnect();
+        heroDiagram.classList.add("is-visible");
+        playHeroDiagram();
+    }, { threshold: 0.4 });
+    heroObserver.observe(heroDiagram);
 }
