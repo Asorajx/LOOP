@@ -313,28 +313,202 @@ a {
 }
 
 .concept-card {
-    display: grid;
-    align-content: start;
-    gap: 4px;
+    min-width: 0;
 }
 
-.concept-card h3 {
+/* A single invisible button covers the whole flat concept area; no expand icons. */
+.concept-card-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    min-height: 100%;
+    gap: 4px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.concept-card-title {
     font-size: 15px;
     font-weight: 600;
+    transition: color 160ms ease;
 }
 
-.concept-card p {
+.concept-card-summary {
     color: var(--muted);
     font-size: 14px;
 }
 
-.concept-card a {
+.concept-card-trigger:hover .concept-card-title,
+.concept-card-trigger:focus-visible .concept-card-title {
+    color: var(--accent);
+}
+
+.concept-card-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 5px;
+}
+
+.concept-focus a:hover .icon {
+    transform: translate(2px, -2px);
+}
+
+/* Hidden must override grid/section display; transitions snapshot both states. */
+.concept-grid[hidden],
+.concept-focus[hidden] {
+    display: none;
+}
+
+.concept-focus-close,
+.concept-focus-nav-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.concept-focus-close:hover,
+.concept-focus-nav-button:not(:disabled):hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.concept-focus-close:focus-visible,
+.concept-focus-nav-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.concept-focus-nav-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* The selected concept grows from its card into the full-width view, and shrinks back. */
+/* The rest of the page changes at once; the other cards fade. */
+/* With reduced motion, concepts.js skips the transition entirely. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+}
+
+/* The band's own colour hides the fading cards underneath, so the box still looks flat. */
+::view-transition-group(loop-concept) {
+    z-index: 1;
+    background: var(--surface-section);
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Keep both snapshots at their real size, pinned top-left, so text never stretches. */
+/* The box grows or shrinks around them and clips whatever doesn't fit yet. */
+::view-transition-old(loop-concept),
+::view-transition-new(loop-concept) {
+    width: 100%;
+    height: 100%;
+    object-fit: none;
+    object-position: left top;
+}
+
+/* The old text leaves before the new text arrives, so the two never overlap. */
+::view-transition-old(loop-concept) {
+    animation: 100ms ease-in both fade-out-concept;
+}
+
+::view-transition-new(loop-concept) {
+    animation: 200ms 100ms ease-out both fade-in-concept;
+}
+
+@keyframes fade-out-concept {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in-concept {
+    from {
+        opacity: 0;
+    }
+}
+
+/* The expanded concept fills the same flat band, with no card around it. */
+.concept-focus-top,
+.concept-focus-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.concept-focus-count {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.concept-focus-title {
+    margin: 6px 0 18px;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* Focus moves here when a concept opens, for screen readers; no ring is needed. */
+.concept-focus-title:focus {
+    outline: none;
+}
+
+.concept-focus-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px 32px;
+    padding: 20px 0 24px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.concept-focus-block h4 {
+    margin-bottom: 6px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.concept-focus-block p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.concept-focus-bottom {
+    flex-wrap: wrap;
+    padding-top: 16px;
+}
+
+.concept-focus-bottom .icon-link {
     font-size: 13px;
     font-weight: 500;
 }
 
-.concept-card a:hover .icon {
-    transform: translate(2px, -2px);
+.concept-focus-nav {
+    display: inline-flex;
+    gap: 10px;
+    margin-left: auto;
 }
 
 
