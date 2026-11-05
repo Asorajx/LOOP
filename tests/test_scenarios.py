@@ -67,10 +67,12 @@ def test_every_action_has_a_story_and_summary(scenario_id):
     action_ids = {action["id"] for action in scenario.ACTIONS}
     assert action_ids == set(scenario.story.ACTION_STORIES)
     assert action_ids == set(scenario.story.ACTION_SUMMARIES)
+    for outcomes in scenario.story.ACTION_SUMMARIES.values():
+        assert "success" in outcomes and set(outcomes) <= {"success", "failure"}
 
 
 # Must match the concept ids in web/js/concepts.js.
-CONCEPT_IDS = {"classes", "attributes", "methods", "inheritance", "encapsulation",
+CONCEPT_IDS = {"classes", "attributes", "methods", "properties", "inheritance", "encapsulation",
                "polymorphism", "abstraction", "relationships"}
 
 
@@ -78,7 +80,9 @@ CONCEPT_IDS = {"classes", "attributes", "methods", "inheritance", "encapsulation
 def test_concepts_are_known(scenario_id):
     story = SCENARIOS[scenario_id].story
     entries = [entry for lines in story.EXPLAIN.values() for entry in lines.values()]
-    entries += list(story.ACTION_SUMMARIES.values()) + [getattr(story, "FALSE_SUMMARY", {})]
+    for outcomes in story.ACTION_SUMMARIES.values():
+        for options in outcomes.values():
+            entries += options if isinstance(options, list) else [options]
     for entry in entries:
         assert entry.get("concept", "methods") in CONCEPT_IDS
 

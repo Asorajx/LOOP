@@ -38,8 +38,8 @@ ACTIONS = [
 
 def build():
     return {
-        "member": Member("Member"),
-        "library": Library("Library"),
+        "member": Member("Member A"),
+        "library": Library("City Library"),
         "BOOK001": Book("Book A"),
         "BOOK002": Book("Book B"),
     }

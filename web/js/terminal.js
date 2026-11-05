@@ -73,8 +73,9 @@ function createIntroCard(run, position, onSelect) {
     if (position === -1) {
         const code = createRow("Code", "");
         code.querySelector(".terminal-row-text").append(
+            document.createTextNode("Run "),
             makeElement("code", "terminal-code", run.call),
-            document.createTextNode(" is about to run."));
+            document.createTextNode("."));
         card.appendChild(code);
     }
     return card;
@@ -110,9 +111,7 @@ function createStepCard(step, isCurrent, firstConcept, onSelect) {
     card.appendChild(code);
 
     if (step.changes.length) {
-        card.appendChild(createRow("Changed", step.changes
-            .map(change => `${capitalise(loop.data.names[change.object] || change.object)}: ${change.attribute} ${formatValue(change.old)} → ${formatValue(change.new)}`)
-            .join("\n"), "state"));
+        card.appendChild(createRow("Changed", step.changes.map(formatChange).join("\n"), "state"));
     }
 
     const concept = CONCEPTS[explain.concept];
@@ -168,6 +167,17 @@ function createConceptRow(concept, text) {
 
 function capitalise(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/* One line of the Changed row, such as "Book A: borrowed_by None → Member A". */
+/* A value that is another object shows that object's name, not a quoted string. */
+/* A property isn't stored: Python works out its value again each time it's read. */
+function formatChange(change) {
+    const names = loop.data.names;
+    const show = (value, isObject) => isObject ? (names[value] || value) : formatValue(value);
+    const note = change.property ? " (property, worked out when read)" : "";
+    return `${capitalise(names[change.object] || change.object)}: ${change.attribute} `
+        + `${show(change.old, change.old_is_object)} → ${show(change.new, change.new_is_object)}${note}`;
 }
 
 /* Two steps repeat an explanation only if both the concept and its detail match. */

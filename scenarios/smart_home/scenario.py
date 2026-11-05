@@ -46,10 +46,10 @@ ACTIONS = [
 
 def build():
     return {
-        "resident": Resident("Resident"),
-        "hub": HomeHub("Home Hub"),
+        "resident": Resident("Home Owner"),
+        "hub": HomeHub("Main Hub"),
         "LIGHT001": Light("Living Room Light"),
         "FAN001": Fan("Bedroom Fan"),
-        "THERMO001": Thermostat("Thermostat"),
+        "THERMO001": Thermostat("Hallway Thermostat"),
         "DOOR001": DoorLock("Front Door"),
     }

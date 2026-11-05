@@ -40,7 +40,8 @@ def test_settings_are_refused_while_a_device_is_off():
         client.post(f"{URL}/reset")
         temperature = act(client, "set_temperature", "THERMO001")
         assert temperature["result"] is False and temperature["after"]["THERMO001"]["temperature"] == 22
-        assert temperature["summary"]["story"] == "Thermostat is switched off, so nothing changed."
+        assert temperature["summary"]["story"] == (
+            "Home Owner cannot change Hallway Thermostat's temperature because it is switched off.")
         brightness = act(client, "set_brightness", "LIGHT001")
         assert brightness["result"] is False and brightness["after"]["LIGHT001"]["brightness"] == 0
 
@@ -53,7 +54,7 @@ def test_light_switches_on_through_the_hub_and_super():
         assert [step["method"] for step in steps] == [
             "Resident.switch_on", "HomeHub.activate", "Light.turn_on", "SmartDevice.turn_on"]
         assert steps[-1]["route"]["kind"] == "super"
-        assert "called super()" in steps[-1]["explain"]["code"]
+        assert "called it with super()" in steps[-1]["explain"]["code"]
         assert "own turn_on()" in steps[2]["explain"]["code"]
         assert result["after"]["LIGHT001"]["is_on"] is True and result["after"]["LIGHT001"]["brightness"] == 100
 

@@ -17,6 +17,11 @@ const CONCEPTS = {
         summary: "Values stored on an object, such as device.infected.",
         docs: `${PYTHON_CLASSES_DOCS}#class-and-instance-variables`
     },
+    properties: {
+        name: "Properties",
+        summary: "A property lets you read a method like an attribute, such as book.available.",
+        docs: "https://docs.python.org/3/library/functions.html#property"
+    },
     methods: {
         name: "Methods",
         summary: "Functions defined in a class. Each call runs on one object, which the method receives as self.",

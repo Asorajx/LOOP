@@ -8,12 +8,21 @@ A scenario is a folder in scenarios/ with a scenario.py that defines:
     STATUS   optional {attribute: settings} drawn as status icons
     build()  returns {label: object} for a fresh simulation; an object's
              name attribute, if it has one, is used as its display name
-and a story.py that defines ACTION_STORIES, ACTION_SUMMARIES and EXPLAIN
-(and optionally FALSE_SUMMARY, used when an action returns False).
+and a story.py that defines ACTION_STORIES, ACTION_SUMMARIES and EXPLAIN.
+
+Each ACTION_SUMMARIES entry has a "success" summary and, for actions that can
+return False, a "failure" summary. The one shown depends on the real result.
+Either can instead be a list of summaries with "when" conditions on the target's
+final state, such as {"when": {"available": True}, ...}; the first match is shown.
+
+Story text can use {target} (the chosen target), {object} (the object running
+the step), {result} (the action's return value) and {label} for any object
+from build(), such as {member}. Each is replaced by that object's display name.
 """
 
 import importlib
 import pkgutil
+import re
 
 import scenarios as scenario_package
 from engine.source import describe_class, read_files, source_files
@@ -101,25 +110,36 @@ def run_action(scenario, objects, action, target):
 
     names = display_names(objects)
     for step in steps:
-        step["explain"] = explain_step(scenario, step, names[target], names.get(step["object"], step["object"]))
+        step["explain"] = explain_step(scenario, step, names, names[target],
+                                       names.get(step["object"], step["object"]))
 
-    summary = scenario.story.ACTION_SUMMARIES.get(action["id"])
-    if result is False and hasattr(scenario.story, "FALSE_SUMMARY"):
-        summary = scenario.story.FALSE_SUMMARY
+    # The summary follows what really happened: False means the action was refused.
+    outcome = "failure" if result is False else "success"
+    after = tracer.state()
+    summary = pick_summary(scenario.story.ACTION_SUMMARIES.get(action["id"], {}).get(outcome), after[target])
 
     return {
         "call": f"{name}.{method}({', '.join(shown)})",
-        "story": fill(scenario.story.ACTION_STORIES.get(action["id"], ""), names[target], names[name]),
+        "story": fill(scenario.story.ACTION_STORIES.get(action["id"], ""), names, names[target], names[name]),
         "before": before,
         "steps": steps,
-        "after": tracer.state(),
+        "after": after,
         "result": tracer.value(result),
-        "summary": {key: fill(value, names[target], names[name], result)
-                    for key, value in (summary or {}).items()},
+        "outcome": outcome,
+        "summary": {key: fill(value, names, names[target], names[name], result)
+                    for key, value in summary.items()},
     }
 
 
-def explain_step(scenario, step, target_name, object_name):
+def pick_summary(options, target_state):
+    """The first summary whose "when" values all match the target's final state."""
+    for option in options if isinstance(options, list) else [options or {}]:
+        if all(target_state.get(key) == value for key, value in option.get("when", {}).items()):
+            return {key: value for key, value in option.items() if key != "when"}
+    return {}
+
+
+def explain_step(scenario, step, names, target_name, object_name):
     """Find the hand-written explanation for this call or line, if there is one."""
     lines = scenario.story.EXPLAIN.get(step["method"], {})
     if step["kind"] == "call":
@@ -131,15 +151,32 @@ def explain_step(scenario, step, target_name, object_name):
 
     if not text:
         return None
-    return {key: fill(value, target_name, object_name) for key, value in text.items()}
+
+    # A line that returns True or False can have a story and code explanation for each
+    # result. The tracer records the return value on the last line a method runs.
+    selected = dict(text)
+    if isinstance(step.get("returns"), bool):
+        outcome = "true" if step["returns"] else "false"
+        for field in ("story", "code"):
+            if f"{field}_{outcome}" in selected:
+                selected[field] = selected[f"{field}_{outcome}"]
+    for field in ("story_true", "story_false", "code_true", "code_false"):
+        selected.pop(field, None)
+    return {key: fill(value, names, target_name, object_name) for key, value in selected.items()}
 
 
-def fill(text, target, obj, result=None):
+def fill(text, names, target, obj, result=None):
+    """Replace {target}, {object}, {result} and object labels such as {member} with display names."""
     if not isinstance(text, str):
         return text
-    starts_with_name = text.startswith(("{target}", "{object}"))
-    text = (text.replace("{target}", str(target))
-                .replace("{object}", str(obj))
-                .replace("{result}", str(result)))
-    # A sentence that starts with a name such as "the connection" needs a capital letter.
-    return text[:1].upper() + text[1:] if starts_with_name else text
+    values = {**names, "target": target, "object": obj, "result": result}
+
+    def name(match):
+        if match.group(2) not in values:
+            return match.group(0)
+        value = str(values[match.group(2)])
+        # A name such as "the connection" that starts a sentence needs a capital letter.
+        starts_sentence = match.group(1) is not None
+        return (match.group(1) or "") + (value[:1].upper() + value[1:] if starts_sentence else value)
+
+    return re.sub(r"(^|[.!?]\s+)?\{(\w+)\}", name, text)

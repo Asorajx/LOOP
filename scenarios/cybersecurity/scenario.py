@@ -56,12 +56,12 @@ def build():
     device_b = Device("Device B")
 
     return {
-        "attacker": Attacker("Attacker"),
+        "attacker": Attacker("Remote Attacker"),
         "malware": MalwareAttack(),
         "ransomware": RansomwareAttack(),
         "intercept": InterceptAttack(),
         "DEV001": device_a,
         "DEV002": device_b,
         "CON001": Connection("the connection", device_a, device_b),
-        "victim": Victim("Victim"),
+        "victim": Victim("Device Owner"),
     }

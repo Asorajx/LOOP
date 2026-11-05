@@ -30,7 +30,7 @@ class Tracer:
         self.steps = []
         self.stack = []
         self.current = None
-        self.snapshot = self.state()
+        self.snapshot = self._read()
         self._known = {}
 
         sys.settrace(self._trace)
@@ -49,13 +49,18 @@ class Tracer:
         a connection that is only online while its devices are) shows up as a change.
         Code run inside the trace function isn't traced, so reading them adds no steps.
         """
+        return {label: {name: self.value(item) for name, item in values.items()}
+                for label, values in self._read().items()}
+
+    def _read(self):
+        """Every object's attributes and property values, as the real Python values."""
         snapshot = {}
         for label, obj in self.objects.items():
-            values = {name: self.value(item) for name, item in vars(obj).items()}
+            values = dict(vars(obj))
             for cls in type(obj).__mro__:
                 for name, member in vars(cls).items():
                     if isinstance(member, property) and name not in values:
-                        values[name] = self.value(getattr(obj, name))
+                        values[name] = getattr(obj, name)
             snapshot[label] = values
         return snapshot
 
@@ -63,6 +68,10 @@ class Tracer:
         if item is None or isinstance(item, (bool, int, float, str)):
             return item
         return self.labels.get(id(item), type(item).__name__)
+
+    def _is_reference(self, item):
+        """True when a value is one of the scenario's objects, shown by its label."""
+        return not isinstance(item, (bool, int, float, str, type(None))) and id(item) in self.labels
 
     # -------------------------
     # Trace events
@@ -155,16 +164,29 @@ class Tracer:
         return step["index"]
 
     def _record_changes(self):
-        """Compare object state with the last snapshot and credit the running line."""
-        now = self.state()
+        """Compare object state with the last snapshot and credit the running line.
+
+        Each change says whether the attribute is a property (worked out each time it
+        is read, not stored), and whether its old and new values are other objects.
+        """
+        now = self._read()
         changes = []
 
         for label, attributes in now.items():
             before = self.snapshot.get(label, {})
             for name, new in attributes.items():
                 old = before.get(name)
-                if old != new:
-                    changes.append({"object": label, "attribute": name, "old": old, "new": new})
+                if self.value(old) != self.value(new):
+                    changes.append({
+                        "object": label,
+                        "attribute": name,
+                        "old": self.value(old),
+                        "new": self.value(new),
+                        "property": isinstance(inspect.getattr_static(type(self.objects[label]), name, None),
+                                               property),
+                        "old_is_object": self._is_reference(old),
+                        "new_is_object": self._is_reference(new),
+                    })
 
         self.snapshot = now
 

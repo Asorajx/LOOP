@@ -59,7 +59,7 @@ def test_a_book_on_loan_cannot_be_borrowed_again():
         act(client, "borrow", "BOOK001")
         result = act(client, "borrow", "BOOK001")
         assert result["result"] is False
-        assert result["summary"]["story"].startswith("Nothing changed")
+        assert result["summary"]["story"] == "Member A cannot borrow Book A because it is already borrowed."
         assert result["before"] == result["after"]
 
 
@@ -93,11 +93,11 @@ def test_returning_a_book_that_is_not_borrowed_changes_nothing():
 def test_check_answers_with_a_string_through_the_property():
     with TestClient(app) as client:
         client.post(f"{URL}/reset")
-        assert act(client, "check", "BOOK001")["summary"]["story"] == "Book A: Available."
+        assert act(client, "check", "BOOK001")["summary"]["story"] == "City Library reports that Book A is available."
         act(client, "borrow", "BOOK001")
         result = act(client, "check", "BOOK001")
         assert result["result"] == "On loan"
-        assert result["summary"]["story"] == "Book A: On loan."
+        assert result["summary"]["story"] == "City Library reports that Book A is on loan."
         routes = [step["route"] for step in result["steps"] if step["kind"] == "call"]
         assert {"from": "Library.check", "to": "Book.available", "kind": "property"}.items() <= routes[-1].items()
 
