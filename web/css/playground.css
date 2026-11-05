@@ -49,8 +49,51 @@
     border-radius: 8px 0 0 8px;
 }
 
-.button-group .playback-button:last-child {
+/* Last of type, because Replay's tooltip comes after it in the group. */
+.button-group .playback-button:last-of-type {
     border-radius: 0 8px 8px 0;
+}
+
+/* A small label under a button, in the same style as the status labels. */
+/* It follows its button, and appears after a short pause on hover or at once on keyboard focus. */
+.tooltip-anchor {
+    position: relative;
+    display: flex;
+}
+
+.tooltip {
+    position: absolute;
+    z-index: 6;
+    top: calc(100% + 6px);
+    left: 0;
+    width: max-content;
+    max-width: 280px;
+    padding: 4px 8px;
+    color: var(--bg);
+    background: var(--text);
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+}
+
+/* Lines up with the right edge, for a button at the end of a group. */
+.tooltip-end {
+    right: 0;
+    left: auto;
+    max-width: 100%;
+}
+
+.tooltip-anchor :hover + .tooltip {
+    opacity: 1;
+    transition-delay: 0.4s;
+}
+
+.tooltip-anchor :focus-visible + .tooltip {
+    opacity: 1;
 }
 
 .playback-progress {

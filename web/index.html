@@ -142,16 +142,20 @@
         </div>
 
         <section class="controls" aria-label="Playback">
-            <div class="button-group">
+            <div class="button-group tooltip-anchor">
                 <button class="playback-button" id="playback-play" type="button" disabled>Play</button>
                 <button class="playback-button" id="playback-pause" type="button" disabled>Pause</button>
                 <button class="playback-button" id="playback-previous" type="button" disabled>Previous</button>
                 <button class="playback-button" id="playback-next" type="button" disabled>Next</button>
                 <button class="playback-button" id="playback-replay" type="button" disabled
-                        title="Show the same run again. The code is not executed a second time.">Replay</button>
+                        aria-describedby="playback-replay-tip">Replay</button>
+                <span class="tooltip tooltip-end" id="playback-replay-tip" role="tooltip">Show the same run again. The code is not executed a second time.</span>
             </div>
-            <button class="playback-button" id="playback-reset" type="button"
-                    title="Recreate every object with its starting values.">Reset</button>
+            <span class="tooltip-anchor">
+                <button class="playback-button" id="playback-reset" type="button"
+                        aria-describedby="playback-reset-tip">Reset</button>
+                <span class="tooltip" id="playback-reset-tip" role="tooltip">Recreate every object with its starting values.</span>
+            </span>
             <span class="playback-progress" id="playback-progress">Step 0 / 0</span>
             <div class="display-options">
                 <button class="text-button" id="toggle-lines" type="button" aria-pressed="false">Show line numbers</button>
