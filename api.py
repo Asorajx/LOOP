@@ -16,6 +16,7 @@ from engine.scenario_manager import describe, find_action, load_scenarios, run_a
 
 app = FastAPI()
 WEB_DIR = Path(__file__).resolve().parent / "web"
+ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 SCENARIOS = load_scenarios()
 
 
@@ -171,4 +172,6 @@ def reset(scenario_id: str):
 # Frontend
 # =========================
 
+# Must come before "/", which would otherwise catch /assets too.
+app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
 app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="frontend")
