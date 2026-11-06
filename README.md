@@ -32,6 +32,7 @@ Scenarios are example contexts for the same OOP ideas, and new scenarios can be 
 
 ## Features
 
+- An OOP fundamentals section explaining nine core concepts before you run anything
 - Real Python execution through FastAPI, traced line by line
 - The genuine Python source, fully visible inside the actor panels
 - Click a method in the code to run an action
@@ -80,5 +81,5 @@ Open **http://127.0.0.1:8000**.
 
 ## Documentation
 
-Latest (V2): [P03-LOOP-v2.pdf](P03-LOOP-v2.pdf)
+Latest (V2): [P03-LOOP-v2.pdf](P03-LOOP-v2.pdf)<br>
 Original (V1): [P03-LOOP-v1.pdf](P03-LOOP-v1.pdf)
