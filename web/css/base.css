@@ -304,6 +304,8 @@ a {
 
 .fundamentals h2 {
     margin-bottom: 20px;
+    font-size: 24px;
+    letter-spacing: -0.02em;
 }
 
 .concept-grid {
@@ -753,5 +755,29 @@ footer {
     .page {
         --section-gap: 36px;
         padding: 24px 16px;
+    }
+}
+
+
+/* =========================
+   Scroll Reveal
+   ========================= */
+
+/* reveal.js adds .reveal only to sections still below the fold, then removes it after the fade. */
+.reveal {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.reveal.is-revealed {
+    opacity: 1;
+    transform: none;
+    transition: opacity 500ms ease-out var(--reveal-delay, 0ms), transform 500ms cubic-bezier(0.2, 0.8, 0.3, 1) var(--reveal-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        opacity: 1;
+        transform: none;
     }
 }

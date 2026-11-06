@@ -59,21 +59,30 @@
     line-height: 1.65;
 }
 
-/* A single arrow instead of a text prompt. It nudges twice once the typing is done, then rests. */
+/* A quiet text link with the original arrow: no fill, so it stays part of the page. */
+/* The arrow nudges twice once the typing is done, then rests. */
 .hero-scroll {
     grid-area: arrow;
-    display: inline-grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    margin: 28px 0 0 -6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    margin: 28px 0 0;
     color: var(--accent);
-    border-radius: 50%;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    text-underline-offset: 4px;
+}
+
+.hero-scroll:hover {
+    text-decoration: underline;
 }
 
 .hero-scroll .icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     stroke-width: 1.75;
     transition: transform 0.15s ease;
     animation: hero-nudge 1.1s ease-in-out 3.2s 2;
@@ -85,7 +94,7 @@
 
 .hero-scroll:focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
 
 @keyframes hero-nudge {
@@ -397,6 +406,16 @@
 
     .hero-actors {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* The call is wider than a 360px phone, so it wraps instead of stretching the page. */
+    .hero-diagram {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero-call {
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .hero-actor[data-panel="3"] {
