@@ -80,4 +80,5 @@ Open **http://127.0.0.1:8000**.
 
 ## Documentation
 
-Original (V1): [P03-LOOP.pdf](P03-LOOP.pdf)
+Latest (V2): [P03-LOOP-v2.pdf](P03-LOOP-v2.pdf)
+Original (V1): [P03-LOOP-v1.pdf](P03-LOOP-v1.pdf)
